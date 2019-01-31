@@ -48,6 +48,7 @@ void setup() {
 }
 
 void loop() {
+  delay(1000);
     Serial.print("Temperature = ");
     Serial.print(bmp.readTemperature());
     Serial.println(" *C");
