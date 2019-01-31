@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
   time_t tempTime;
 
   if (argc != 2)  {
-    printf("Invalid number of arguments received!");
+    printf("Invalid number of arguments received!\r\n");
     exit(1);
   }
 
@@ -41,19 +41,19 @@ int main(int argc, char** argv) {
 
     printf("Record type ID00\r\n");
     tempTime = (time_t)idData.idLastBootTime;
-    timeInfo = localtime(&tempTime);
-    printf("Last Boot Time: %s", asctime(timeInfo));
+    timeInfo = gmtime(&tempTime);
+    printf("Last Boot:   %s", asctime(timeInfo));
     tempTime = (time_t)idData.idGPSTime;
-    timeInfo = localtime(&tempTime);
-    printf("GPS time: %s", asctime(timeInfo));
-    printf("latitude: %f\r\n", idData.idLatitude); 
-    printf("longitude: %f\r\n", idData.idLongitude);
-    printf("altitude: %f\r\n", idData.idAltitude);
-    printf("speed: %f\r\n", idData.idSpeed);
-    printf("course: %f\r\n", idData.idCourse);
-    printf("temperature: %fC\r\n", idData.idTemperature);
-    printf("pressure: %f P\r\n", idData.idPressure);
-    printf("remote temperature: %fC\r\n", idData.idRemoteTemp);
+    timeInfo = gmtime(&tempTime);
+    printf("GPS time:    %s", asctime(timeInfo));
+    printf("latitude:    %f\r\n", idData.idLatitude); 
+    printf("longitude:   %f\r\n", idData.idLongitude);
+    printf("altitude:    %f\r\n", idData.idAltitude);
+    printf("speed:       %f\r\n", idData.idSpeed);
+    printf("course:      %f\r\n", idData.idCourse);
+    printf("temperature: %f C\r\n", idData.idTemperature);
+    printf("pressure:    %f Pa\r\n", idData.idPressure);
+    printf("remote temp: %f C\r\n", idData.idRemoteTemp);
 
   } else {
     printf("Invalid record type!!!\r\n");
