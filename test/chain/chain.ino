@@ -25,12 +25,14 @@ void setup()
   //schain.print("+1::debug=1\n");
 
   schain.print("+1::measure\n");
-  //delay(1000);
+  delay(1000);
 
   //schain.print("+1::light\n");
-  /*
+  
   charCount = 0;
-
+   
+  while(!schain.available() > 0); 
+   
   while (schain.available() > 0) {
     char inByte = schain.read();
     Serial.write(inByte);
@@ -43,7 +45,7 @@ void setup()
   Serial.print("\r\nTotal characters read = \r\n");
   Serial.print(charCount);
   Serial.print("\r\n");
-  */
+  
 }
 
 void loop()

@@ -39,24 +39,25 @@ int main(int argc, char** argv) {
 
     convertStringToStruct(argv[1], (char*)&idData);
 
-    printf("Record type ID00\r\n");
-    tempTime = (time_t)idData.idLastBootTime;
-    timeInfo = gmtime(&tempTime);
-    printf("Last Boot:   %s", asctime(timeInfo));
-    tempTime = (time_t)idData.idGPSTime;
-    timeInfo = gmtime(&tempTime);
-    printf("GPS time:    %s", asctime(timeInfo));
-    printf("latitude:    %f\r\n", idData.idLatitude); 
-    printf("longitude:   %f\r\n", idData.idLongitude);
-    printf("altitude:    %f\r\n", idData.idAltitude);
-    printf("speed:       %f\r\n", idData.idSpeed);
-    printf("course:      %f\r\n", idData.idCourse);
-    printf("temperature: %f C\r\n", idData.idTemperature);
-    printf("pressure:    %f Pa\r\n", idData.idPressure);
-    printf("remote temp: %f C\r\n", idData.idRemoteTemp);
-
-  } else {
-    printf("Invalid record type!!!\r\n");
+    if (strncmp(idData.idRecordType, "ID00", 4) == 0) {
+      printf("Record type ID00\r\n");
+      tempTime = (time_t)idData.idLastBootTime;
+      timeInfo = gmtime(&tempTime);
+      printf("Last Boot:   %s", asctime(timeInfo));
+      tempTime = (time_t)idData.idGPSTime;
+      timeInfo = gmtime(&tempTime);
+      printf("GPS time:    %s", asctime(timeInfo));
+      printf("latitude:    %f\r\n", idData.idLatitude); 
+      printf("longitude:   %f\r\n", idData.idLongitude);
+      printf("altitude:    %f\r\n", idData.idAltitude);
+      printf("speed:       %f\r\n", idData.idSpeed);
+      printf("course:      %f\r\n", idData.idCourse);
+      printf("temperature: %f C\r\n", idData.idTemperature);
+      printf("pressure:    %f Pa\r\n", idData.idPressure);
+      printf("remote temp: %f C\r\n", idData.idRemoteTemp);
+    } else {
+      printf("Invalid record type!!!\r\n");
+    }
   }
 }
 

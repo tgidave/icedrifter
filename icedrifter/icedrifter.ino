@@ -1,3 +1,25 @@
+/// ///////////////////////////////////////////////////////////
+/// icedrifter.ino 
+///  
+/// This program implements the functionality neede to run the 
+/// icedrifter sensor array. 
+/// 
+/// There are four sensors and a communication devices
+/// controlled by this code:
+/// 
+/// 1. a GPS module
+/// 2. a BMP280 module to collect temperature and air pressure.
+/// 3. a remote temperature sensor driven by a DS18B23.
+/// 4. an optional temperature and light chain.
+/// 5. an Iridium network comminication device,
+/// 
+/// The system sleeps for 24 hours and then wakes up and
+/// collects data.  After all data is collected it is
+/// transmitted through the Iridium network to the user.
+/// 
+/// ///////////////////////////////////////////////////////////
+
+
 #include <TimeLib.h>
 #include <Time.h>
 
@@ -13,8 +35,6 @@
 #include "bmp280.h"
 #include "ds18b20.h"
 #include "rockblock.h"
-
-//#define TEST_ALL  // test as much code a possible at bootup.
 
 #define CONSOLE_BAUD 115200
 
@@ -54,7 +74,7 @@ enum period_t {
 
 void powerDown(void) {
   ADCSRA &= ~(1 << ADEN);
-  wdt_enable(SLEEP_8S);
+  wdt_enable(SLEEP_8S);e
   WDTCSR |= (1 << WDIE);	
   sleepMode(SLEEP_POWER_SAVE);
   sleep();
