@@ -74,7 +74,7 @@ enum period_t {
 
 void powerDown(void) {
   ADCSRA &= ~(1 << ADEN);
-  wdt_enable(SLEEP_8S);e
+  wdt_enable(SLEEP_8S);
   WDTCSR |= (1 << WDIE);	
   sleepMode(SLEEP_POWER_SAVE);
   sleep();
@@ -217,8 +217,8 @@ void loop() {
   fixFound = gpsGetFix(FIX_TIME, &idData);
 #else
   if (!firstTime &&
-      ((hour(idData.idGPSTime) == 12) ||
-       (noFixFoundCount >= 24))) {
+      ((fixFound && ((hour(idData.idGPSTime) == 0) || (hour(idData.idGPSTime) == 12))) ||
+      noFixFoundCount >= 24)) {
     noFixFoundCount = 0;
     accumulateAndSendData();
 
