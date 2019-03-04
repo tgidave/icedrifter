@@ -63,6 +63,45 @@ enum period_t {
   SLEEP_FOREVER
 };
 
+// This table is used to determine when to report data through the
+// Iridium system.  It is set up as UTC times from midnight to 23:00
+// hours.  If an hour is set to false, the system will not report.
+// If an hour is set to true, a report will be attempted on the next
+// half hour.  I.E. if Noon UTC is set to true, the system will try
+// to report at 12:30 UTC.  If all hour entries are set to true the 
+// system will try to report every hour on the half hour.  If all hour 
+// entries are set to false, the system will never try to report.
+//
+// This table is set for standard time and does not account for local 
+// daylight savings time.
+
+const bool timeToReport[24] = {
+  false,  // Midnight UTC
+  false,  // 1 o'clock UTC 
+  false,  // 2 o'clock UTC 
+  false,  // 3 o'clock UTC 
+  false,  // 4 o'clock UTC 
+  false,  // 5 o'clock UTC 
+  false,  // 6 o'clock UTC 
+  true,   // 7 o'clock UTC - Midnight Mountain standard time
+  false,  // 8 o'clock UTC 
+  false,  // 9 o'clock UTC 
+  false,  // 10 o'clock UTC 
+  false,  // 11 o'clock UTC 
+  false,  // Noon UTC 
+  false,  // 13 o'clock UTC 
+  false,  // 14 o'clock UTC 
+  false,  // 15 o'clock UTC 
+  false,  // 16 o'clock UTC 
+  false,  // 17 o'clock UTC 
+  false,  // 18 o'clock UTC 
+  true,   // 19 o'clock UTC - Noon Mountain standard time 
+  false,  // 20 o'clock UTC 
+  false,  // 21 o'clock UTC 
+  false,  // 22 o'clock UTC 
+  false,  // 23 o'clock UTC 
+};
+
 //! powerDown - Put processor into low power mode.
 //! 
 //! This function first set up the watchdog timer to go of after the maxiuum interval 
@@ -217,7 +256,7 @@ void loop() {
   fixFound = gpsGetFix(FIX_TIME, &idData);
 #else
   if (!firstTime &&
-      ((fixFound && ((hour(idData.idGPSTime) == 7) || (hour(idData.idGPSTime) == 19))) ||
+      ((fixFound && timeToReport[hour(idData.idGPSTime)] == true) ||
       noFixFoundCount >= 24)) {
     noFixFoundCount = 0;
     accumulateAndSendData();
