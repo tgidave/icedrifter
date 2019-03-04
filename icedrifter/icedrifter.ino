@@ -217,7 +217,7 @@ void loop() {
   fixFound = gpsGetFix(FIX_TIME, &idData);
 #else
   if (!firstTime &&
-      ((fixFound && ((hour(idData.idGPSTime) == 0) || (hour(idData.idGPSTime) == 12))) ||
+      ((fixFound && ((hour(idData.idGPSTime) == 7) || (hour(idData.idGPSTime) == 19))) ||
       noFixFoundCount >= 24)) {
     noFixFoundCount = 0;
     accumulateAndSendData();
