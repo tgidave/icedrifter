@@ -10,7 +10,7 @@
 
 TinyGPSPlus tinygps;
 
-int gpsGetFix(fixType typeFix, icedrifterData *idData) {
+int gpsGetFix(fixType typeFix, icedrifterData * idData) {
 
   int fixfnd = false;
   unsigned long now;

@@ -9,12 +9,17 @@
 #define ROCKBLOCK_BAUD 19200
 #define ROCKBLOCK_POWER_PIN 15
 
-//#define SEND_2_RECORDS
+#define MAX_CHUNK_LENGTH  340
+#define CHUNK_HEADER_SIZE 8
+#define MAX_CHUNK_DATA_LENGTH (MAX_CHUNK_LENGTH - CHUNK_HEADER_SIZE)
 
-//#ifdef SEND_2_RECORDS
-//void transmitIcedrifterData(char *, int, char *, int);
-//#else
-void transmitIcedrifterData(icedrifterData *, int);
-//#endif  //SEND_2_RECORDS
+typedef struct iceDrifterChunk {
+  time_t idcSendTime;
+  char idcRecordType[2];
+  uint16_t idcRecordNumber;
+  uint8_t idcBuffer[MAX_CHUNK_LENGTH];
+} iceDrifterChunk; 
+
+void rbTransmitIcedrifterData(icedrifterData *, int);
 
 #endif  //_ROCKBLOCK_H

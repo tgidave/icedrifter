@@ -8,7 +8,6 @@
 
 #define BMP280_POWER_PIN 19
 
-void initBMP280(void);
 void getBMP280Data(icedrifterData* idData);
 
 #endif
