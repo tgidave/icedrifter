@@ -50,11 +50,11 @@
 // you can uncomment the next define.  This will try to send a 
 // verification transmit as soon as the device is powered up.
 
-//#define TRANSMIT_AT_BOOT
+#define TRANSMIT_AT_BOOT
 
 //To turn off the debugging messages, comment out the next line.
 
-#define SERIAL_DEBUG
+//#define SERIAL_DEBUG
 
 //The following defines are used to control what data is transmitted during debugging.
 //If "SERIAL_DEBUG" is not defined they have no effect.
