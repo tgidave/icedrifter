@@ -114,7 +114,7 @@ const char hexchars[] = "0123456789ABCDEF";
 void printHexChar(uint8_t x) {
   Serial.print(hexchars[(x >> 4)]);
   Serial.print(hexchars[(x & 0x0f)]);
-} 
+}
 
 /// powerDown - Put processor into low power mode.
 ///
@@ -160,14 +160,14 @@ void accumulateAndSendData(void) {
   int i, j;
 
   int chainRetryCount;
-  int totalDataLength; 
+  int totalDataLength;
   int recCount;
   int cdError;
-  uint8_t * wkPtr; 
+  uint8_t* wkPtr;
 
 
 
-  idData.idSwitches = idData.idTempSensorCount = idData.idLightSensorCount = 0; 
+  idData.idSwitches = idData.idTempSensorCount = idData.idLightSensorCount = 0;
 
 #ifdef PROCESS_REMOTE_TEMP_SWITCH
   idData.idSwitches |= PROCESS_REMOTE_TEMP_SWITCH;
@@ -177,11 +177,11 @@ void accumulateAndSendData(void) {
   idData.idSwitches |= PEOCESS_CHAIN_DATA_SWITCH;
   idData.idTempSensorCount = TEMP_SENSOR_COUNT;
   idData.idLightSensorCount = LIGHT_SENSOR_COUNT;
-#endif 
+#endif
 
 #ifdef SEND_RGB
   idData.idSwitches |= SEND_RGB_SWITCH;
-#endif 
+#endif
 
   idData.idLastBootTime = lbTime;
 
@@ -206,7 +206,7 @@ void accumulateAndSendData(void) {
 #ifdef PROCESS_CHAIN_DATA
   chainRetryCount = 0;
 
-  while ((cdError = processChainData((uint8_t *)&idData.idChainData)) != 0) {
+  while ((cdError = processChainData((uint8_t*)&idData.idChainData)) != 0) {
     ++chainRetryCount;
     if (chainRetryCount >= MAX_CHAIN_RETRIES) {
       break;
@@ -224,7 +224,7 @@ void accumulateAndSendData(void) {
 #endif  // PROCESS_CHAIN_DATA
 
 
-  wkPtr = (uint8_t *)&idData; 
+  wkPtr = (uint8_t*)&idData;
 
 #ifdef SERIAL_DEBUG
   DEBUG_SERIAL.print(F("Dumping data record\r\n"));
@@ -321,6 +321,13 @@ void loop() {
 
 #ifdef TEST_ALL
   accumulateAndSendData();
+#elif defined(TRANSMIT_AT_BOOT)
+  if (firstTime ||
+      ((fixFound && timeToReport[hour(idData.idGPSTime)] == true) ||
+       noFixFoundCount >= 24)) {
+    noFixFoundCount = 0;
+    accumulateAndSendData();
+  }
 #else
   if (!firstTime &&
       ((fixFound && timeToReport[hour(idData.idGPSTime)] == true) ||

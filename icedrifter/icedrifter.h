@@ -46,9 +46,15 @@
 
 //#define NEVER_TRANSMIT  // Do everything except transmit data.
 
+// To help make sure the drifter is set up correctly in the field
+// you can uncomment the next define.  This will try to send a 
+// verification transmit as soon as the device is powered up.
+
+//#define TRANSMIT_AT_BOOT
+
 //To turn off the debugging messages, comment out the next line.
 
-//#define SERIAL_DEBUG
+#define SERIAL_DEBUG
 
 //The following defines are used to control what data is transmitted during debugging.
 //If "SERIAL_DEBUG" is not defined they have no effect.
@@ -74,7 +80,7 @@
 // sensors are collected and reported.  If the temperature and light
 // chain sensor is not present, comment out the next line.
 
-#define PROCESS_CHAIN_DATA
+//#define PROCESS_CHAIN_DATA
 
 #define MAX_CHAIN_RETRIES 3
 #define TEMP_SENSOR_COUNT   16
@@ -87,7 +93,6 @@ typedef struct chainData {
   uint16_t cdTempData[TEMP_SENSOR_COUNT];
   uint16_t cdLightData[LIGHT_SENSOR_COUNT][LIGHT_SENSOR_FIELDS];
 } chainData;
-
 
 //icedrifter data record definition.
 typedef struct icedrifterData {
@@ -122,16 +127,5 @@ typedef struct icedrifterData {
 #endif // PROCESS_CHAIN_DATA
 
 } icedrifterData; 
-/*
-#define MAX_CHUNK_LENGTH 332
-#define CHUNK_HEADER_SIZE 8
-
-typedef struct iceDrifterChunk {
-  time_t idcSendTime;
-  char idcRecordType[2];
-  uint16_t idcRecordNumber;
-  uint8_t idcBuffer[MAX_CHUNK_LENGTH];
-} iceDrifterChunk;
-*/
 
 #endif // _ICEDRIFTER_H
