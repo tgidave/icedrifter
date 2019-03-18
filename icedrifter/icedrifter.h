@@ -54,7 +54,7 @@
 
 //To turn off the debugging messages, comment out the next line.
 
-//#define SERIAL_DEBUG
+#define SERIAL_DEBUG
 
 //The following defines are used to control what data is transmitted during debugging.
 //If "SERIAL_DEBUG" is not defined they have no effect.
@@ -80,11 +80,11 @@
 // sensors are collected and reported.  If the temperature and light
 // chain sensor is not present, comment out the next line.
 
-//#define PROCESS_CHAIN_DATA
+#define PROCESS_CHAIN_DATA
 
 #define MAX_CHAIN_RETRIES 3
-#define TEMP_SENSOR_COUNT   16
-#define LIGHT_SENSOR_COUNT  8
+#define TEMP_SENSOR_COUNT   160
+#define LIGHT_SENSOR_COUNT  64
 #define LIGHT_SENSOR_FIELDS 4
 #define TEMP_DATA_SIZE (TEMP_SENSOR_COUNT * sizeof(uint16_t))
 #define LIGHT_DATA_SIZE ((LIGHT_SENSOR_COUNT * LIGHT_SENSOR_FIELDS) * sizeof(uint16_t))
@@ -99,7 +99,7 @@ typedef struct icedrifterData {
   uint8_t idSwitches;
 
 #define PROCESS_REMOTE_TEMP_SWITCH  0x01
-#define PEOCESS_CHAIN_DATA_SWITCH   0x02
+#define PROCESS_CHAIN_DATA_SWITCH   0x02
 
   uint8_t idTempSensorCount; 
   uint8_t idLightSensorCount;

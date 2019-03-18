@@ -174,7 +174,7 @@ void accumulateAndSendData(void) {
 #endif
 
 #ifdef PROCESS_CHAIN_DATA
-  idData.idSwitches |= PEOCESS_CHAIN_DATA_SWITCH;
+  idData.idSwitches |= PROCESS_CHAIN_DATA_SWITCH;
   idData.idTempSensorCount = TEMP_SENSOR_COUNT;
   idData.idLightSensorCount = LIGHT_SENSOR_COUNT;
 #endif
@@ -220,7 +220,10 @@ void accumulateAndSendData(void) {
 #ifdef PROCESS_CHAIN_DATA
   if (cdError == 0) {
     totalDataLength += (TEMP_DATA_SIZE + LIGHT_DATA_SIZE);
+  } else {
+    idData.idSwitches &= ~PROCESS_CHAIN_DATA_SWITCH;  // Since no chain data is being sent, turn off the process chain data switch.
   }
+
 #endif  // PROCESS_CHAIN_DATA
 
 
@@ -379,3 +382,4 @@ void loop() {
   DEBUG_SERIAL.flush();
 #endif
 }
+
