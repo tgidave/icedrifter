@@ -48,7 +48,7 @@
 
 // The NEVER_TRANSMIT switch does all processing determined by
 // other switches including turning on and initializing the
-// Rockblock hardware and software but the rockbolock send function
+// Rockblock hardware and software but the rockblock send function
 // is never called
 
 //#define NEVER_TRANSMIT  // Do everything except transmit data.
@@ -81,7 +81,7 @@
 
 #define TRANSMIT_AT_BOOT
 
-// The next define conrtols weather data from the remote temperature sensor
+// The next define controls whether or not data from the remote temperature sensor
 // are collected and reported.  If the remote temperature sensor is not
 // present, comment out the next line.
 
@@ -89,7 +89,7 @@
 
 #ifdef ARDUINO
 
-// The next define conrtols weather data from the temperature and light
+// The next define controls whether or not data from the temperature and light
 // sensors are collected and reported.  If the temperature and light
 // chain sensor is not present, comment out the next line.
 #define PROCESS_CHAIN_DATA
