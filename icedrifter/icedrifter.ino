@@ -1,7 +1,7 @@
 /*!                                                                              
  *  @file icedrifter.ino                                                  
  *                                                                               
- *  @mainpage Code to implement the Icedrifter bouy.                     
+ *  @mainpage Code to implement the Icedrifter buoy.                     
  *                                                                               
  *  @section intro_sec Introduction                                              
  *  
@@ -171,17 +171,17 @@ void accumulateAndSendData(void) {
 
 #ifdef PROCESS_REMOTE_TEMP_SWITCH
   idData.idSwitches |= PROCESS_REMOTE_TEMP_SWITCH;
-#endif
+#endif // PROCESS_REMOTE_TEMP_SWITCH
 
 #ifdef PROCESS_CHAIN_DATA
   idData.idSwitches |= PROCESS_CHAIN_DATA_SWITCH;
   idData.idTempSensorCount = TEMP_SENSOR_COUNT;
   idData.idLightSensorCount = LIGHT_SENSOR_COUNT;
-#endif
+#endif // PROCESS_CHAIN_DATA
 
 #ifdef SEND_RGB
   idData.idSwitches |= SEND_RGB_SWITCH;
-#endif
+#endif // SEND_RGB
 
   idData.idLastBootTime = lbTime;
 
@@ -189,9 +189,6 @@ void accumulateAndSendData(void) {
     idData.idGPSTime = 0;
     idData.idLatitude = 0;
     idData.idLongitude = 0;
-    idData.idAltitude = 0;
-    idData.idSpeed = 0;
-    idData.idCourse = 0;
   }
 
   getBMP280Data(&idData);
@@ -260,12 +257,12 @@ void setup() {
 #ifdef PROCESS_REMOTR_TEMP
   pinMode(DS18B20_POWER_PIN, OUTPUT);
   digitalWrite(DS18B20_POWER_PIN, LOW);
-#endif
+#endif // PROCESS_REMOTR_TEMP
 
 #ifdef PROCESS_CHAIN_DATA
   pinMode(CHAIN_POWER_PIN, OUTPUT);
   digitalWrite(CHAIN_POWER_PIN, LOW);
-#endif
+#endif // PROCESS_CHAIN_DATA
 
   pinMode(ROCKBLOCK_POWER_PIN, OUTPUT);
   digitalWrite(ROCKBLOCK_POWER_PIN, LOW);
@@ -273,14 +270,14 @@ void setup() {
 #ifdef SERIAL_DEBUG
   //! Start the serial ports
   DEBUG_SERIAL.begin(CONSOLE_BAUD);
-#endif
+#endif // SERIAL_DEBUG
 
   gotFullFix = false; //! Clear the GPS full fix switch so the first call to the loop function requests a full fix.
   firstTime = true;
 
 #ifdef SERIAL_DEBUG
   DEBUG_SERIAL.print(F("Setup done\r\n")); //! Let the user know we are done with the setup function.
-#endif
+#endif // SERIAL_DEBUG
 
 }
 
@@ -338,7 +335,7 @@ void loop() {
     noFixFoundCount = 0;
     accumulateAndSendData();
   }
-#endif
+#endif // TEST_ALL
 
   // Accumulating and sending the data can take a while so update the time again.
   fixFound = gpsGetFix(FIX_TIME, &idData);
@@ -359,14 +356,14 @@ void loop() {
     DEBUG_SERIAL.print(F(" minutes\r\n"));
     DEBUG_SERIAL.flush();
     DEBUG_SERIAL.end();
-#endif
+#endif // SERIAL_DEBUG
     sleepSecs = sleepMins * 60;
   } else {
 #ifdef SERIAL_DEBUG
     DEBUG_SERIAL.print(F("Fix not found - sleep 60 minutes\r\n"));
     DEBUG_SERIAL.flush();
     DEBUG_SERIAL.end();
-#endif
+#endif // SERIAL_DEBUG
     sleepSecs = 3600;
   }
 
@@ -380,6 +377,6 @@ void loop() {
   DEBUG_SERIAL.begin(CONSOLE_BAUD);
   DEBUG_SERIAL.print(F("wake up\r\n"));
   DEBUG_SERIAL.flush();
-#endif
+#endif // SERIAL_DEBUG
 }
 

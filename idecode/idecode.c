@@ -6,9 +6,9 @@
 
 #include "../icedrifter/icedrifter.h"
 
-#define BUFFSIZE 2048
-
 icedrifterData idData;
+
+#define BUFFSIZE 2048
 
 char buff[BUFFSIZE];
 
@@ -18,7 +18,7 @@ uint8_t rgbRed;
 uint8_t rgbGreen;
 uint8_t rgbBlue;
 
-void convertStringToStruct(char* charPtr, char* binPtr);
+void convertStringToStruct(char* charPtr);
 uint16_t convertCharToHex(char* ptr);
 void convertBigEndianToLittleEndian(char* sPtr, int size);
 float convertTempToC(short temp);
@@ -61,20 +61,9 @@ int main(int argc, char** argv) {
     }
   }
 
-/*
-  if (dataLen != (sizeof(idData) * 2)) {
-    printf("\r\n*** Data invalid lentgh ");
-    printf("%d", dataLen);
-    printf(" should be %d ***\r\n", (int)(sizeof(idData) * 2));
-    exit(1);
-  }
-*/
+  convertStringToStruct(buff);
 
-  convertStringToStruct(buff, (char*)&idData);
-
-  if (idData.idSwitches & PROCESS_CHAIN_DATA_SWITCH) {
-    convertBigEndianToLittleEndian((char*)&idData.idChainData, sizeof(idData.idChainData));
-  }
+  convertBigEndianToLittleEndian((char*)&idData.idChainData, sizeof(idData.idChainData));
 
   tempTime = (time_t)idData.idLastBootTime;
   timeInfo = gmtime(&tempTime);
@@ -84,9 +73,6 @@ int main(int argc, char** argv) {
   printf("GPS time:    %s", asctime(timeInfo));
   printf("latitude:    %f\r\n", idData.idLatitude);
   printf("longitude:   %f\r\n", idData.idLongitude);
-  printf("altitude:    %f\r\n", idData.idAltitude);
-  printf("speed:       %f\r\n", idData.idSpeed);
-  printf("course:      %f\r\n", idData.idCourse);
   printf("temperature: %f C\r\n", idData.idTemperature);
   printf("pressure:    %f Pa\r\n", idData.idPressure);
 
@@ -94,37 +80,85 @@ int main(int argc, char** argv) {
     printf("remote temp: %f C\r\n\r\n", idData.idRemoteTemp);
   }
 
-  if (idData.idSwitches & PROCESS_CHAIN_DATA_SWITCH) {
-    for (i = 0; i < TEMP_SENSOR_COUNT; ++i) {
-      printf("Chain temperature sensor %3d = %f\r\n", i, convertTempToC(idData.idChainData.cdTempData[i]));
+  i = 0;
+
+  while (idData.idTempSensorCount > 0) {
+    printf("Chain temperature sensor %3d = %f\r\n", i, convertTempToC(idData.idChainData.cdTempData[i]));
+    ++i;
+    --idData.idTempSensorCount;
+  }
+
+  printf("\r\n");
+
+  i = 0;
+
+  while (idData.idLightSensorCount > 0) {
+    if (idData.idChainData.cdLightData[i][0] == 0) {
+      rgbRed = rgbGreen = rgbBlue = 0;
+    } else {
+      ltClear = (uint32_t)idData.idChainData.cdLightData[i][0];
+      rgbRed = (float)idData.idChainData.cdLightData[i][1] / ltClear * 255.0;
+      rgbGreen = (float)idData.idChainData.cdLightData[i][2] / ltClear * 255.0;
+      rgbBlue = (float)idData.idChainData.cdLightData[i][3] / ltClear * 255.0;
     }
 
-    printf("\r\n");
+    printf("Chain light sensor %2d = %5hu %5hu %5hu %5hu  RGB %3d %3d %3d\r\n", i,
+           idData.idChainData.cdLightData[i][0], idData.idChainData.cdLightData[i][1], idData.idChainData.cdLightData[i][2], idData.idChainData.cdLightData[i][3],
+           rgbRed, rgbGreen, rgbBlue);
 
-    for (i = 0; i < LIGHT_SENSOR_COUNT; ++i) {
-      if (idData.idChainData.cdLightData[i][0] == 0) {
-        rgbRed = rgbGreen = rgbBlue = 0;
-      } else {
-        ltClear = (uint32_t)idData.idChainData.cdLightData[i][0];
-        rgbRed = (float)idData.idChainData.cdLightData[i][1] / ltClear * 255.0;
-        rgbGreen = (float)idData.idChainData.cdLightData[i][2] / ltClear * 255.0;
-        rgbBlue = (float)idData.idChainData.cdLightData[i][3] / ltClear * 255.0;
-      }
-      printf("Chain light sensor %2d = %5hu %5hu %5hu %5hu  RGB %3d %3d %3d\r\n", i,
-             idData.idChainData.cdLightData[i][0], idData.idChainData.cdLightData[i][1], idData.idChainData.cdLightData[i][2], idData.idChainData.cdLightData[i][3],
-             rgbRed, rgbGreen, rgbBlue);
-    }
+    ++i;
+    --idData.idLightSensorCount;
   }
 }
 
-void convertStringToStruct(char* charPtr, char* binPtr) {
+void convertStringToStruct(char* charPtr) {
+  char* binPtr;
+  int i = 0; 
   char hByte0;
   char hByte1;
-//  int i = 0;
 //  int j = 0;
 //  int len;
 
-  while (*charPtr != 0) {
+  binPtr = (char*)&idData;
+
+  for (i = 0; i < BASE_RECORD_LENGTH; ++i) {
+    if (charPtr == 0) {
+      printf("Not enough data to complete base record!  Can not continue!!!\r\n");
+      exit(1);
+    }
+
+    hByte0 = convertCharToHex(charPtr);
+    ++charPtr;
+    hByte1 = convertCharToHex(charPtr);
+    ++charPtr;
+    *binPtr = (hByte0 << 4) | hByte1;
+    ++binPtr;
+  }
+
+  binPtr = (char*)&idData.idChainData.cdTempData;
+
+  for (i = 0; i < (idData.idTempSensorCount * sizeof(short)); ++i) {
+    if (charPtr == 0) {
+      printf("Not enough data to complete temperature data structure!  Continuing but data may be corrupt!!!\r\n");
+      break;
+    }
+
+    hByte0 = convertCharToHex(charPtr);
+    ++charPtr;
+    hByte1 = convertCharToHex(charPtr);
+    ++charPtr;
+    *binPtr = (hByte0 << 4) | hByte1;
+    ++binPtr;
+  }
+
+  binPtr = (char*)&idData.idChainData.cdLightData;
+  
+  for (i = 0; i <((idData.idLightSensorCount * LIGHT_SENSOR_FIELDS) * sizeof(short)); ++i) {
+    if (charPtr == 0) {
+      printf("Not enough data to complete light data structure!  Continuing but data may be corrupt!!!\r\n");
+      break;
+    }
+
     hByte0 = convertCharToHex(charPtr);
     ++charPtr;
     hByte1 = convertCharToHex(charPtr);

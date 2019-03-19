@@ -70,27 +70,18 @@ int gpsGetFix(fixType typeFix, icedrifterData * idData) {
     str.print(tinygps.time.minute());
     str.print(F(":"));
     str.print(tinygps.time.second());
-#endif
+#endif // SERIAL_DEBUG_GPS
 
     if (typeFix == FIX_FULL) {
       idData->idLatitude = tinygps.location.lat();
       idData->idLongitude = tinygps.location.lng();
-      idData->idSpeed = tinygps.speed.knots();
-      idData->idAltitude = tinygps.altitude.meters();
-      idData->idCourse = tinygps.course.value() / 100;
 
 #ifdef SERIAL_DEBUG_GPS
       str.print(F(" "));
       str.print(tinygps.location.lat(), 6);
       str.print(F(","));
       str.print(tinygps.location.lng(), 6);
-      str.print(F(","));
-      str.print(tinygps.speed.knots(), 1);
-      str.print(F(","));
-      str.print(tinygps.altitude.meters());
-      str.print(F(","));
-      str.print(tinygps.course.value() / 100);
-#endif
+#endif // SERIAL_DEBUG_GPS
 
     }
 

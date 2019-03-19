@@ -2,7 +2,7 @@
 /*!                                                                              
  *  @file icedrifter.ino                                                  
  *                                                                               
- *  @mainpage Code to implement the Icedrifter bouy.                     
+ *  @mainpage Code to implement the Icedrifter buoy.                     
  *                                                                               
  *  @section intro_sec Introduction                                              
  *  
@@ -37,20 +37,20 @@
 // and then every hour on the half hour after that.  Comment out
 // the next line to run normally.
 
-//#define TEST_ALL  // test as much code a possible at bootup.
+#define TEST_ALL  // test as much code a possible at bootup.
 
 // The NEVER_TRANSMIT switch does all processing determined by
 // other switches including turning on and initializing the 
 // Rockblock hardware and software but the rockbolock send function
 // is never called
 
-//#define NEVER_TRANSMIT  // Do everything except transmit data.
+#define NEVER_TRANSMIT  // Do everything except transmit data.
 
 // To help make sure the drifter is set up correctly in the field
 // you can uncomment the next define.  This will try to send a 
 // verification transmit as soon as the device is powered up.
 
-#define TRANSMIT_AT_BOOT
+//#define TRANSMIT_AT_BOOT
 
 //To turn off the debugging messages, comment out the next line.
 
@@ -76,18 +76,30 @@
 
 #define PROCESS_REMOTE_TEMP
 
-// The next define conrtols weather data from the temperature and light 
+#ifdef ARDUINO
+// The next define conrtols weather data from the temperature and light
 // sensors are collected and reported.  If the temperature and light
 // chain sensor is not present, comment out the next line.
 
-#define PROCESS_CHAIN_DATA
+//#define PROCESS_CHAIN_DATA
 
-#define MAX_CHAIN_RETRIES 3
 #define TEMP_SENSOR_COUNT   160
 #define LIGHT_SENSOR_COUNT  64
+
+#else // ARDUINO
+
+// These defines are only used during the compilation of the decoder program.
+// If you change one of these values you will need to recompile the decoder program.
+#define PROCESS_CHAIN_DATA
+#define TEMP_SENSOR_COUNT   160
+#define LIGHT_SENSOR_COUNT  64
+#endif // ARDUINO
+
+#define MAX_CHAIN_RETRIES 3
 #define LIGHT_SENSOR_FIELDS 4
 #define TEMP_DATA_SIZE (TEMP_SENSOR_COUNT * sizeof(uint16_t))
 #define LIGHT_DATA_SIZE ((LIGHT_SENSOR_COUNT * LIGHT_SENSOR_FIELDS) * sizeof(uint16_t))
+
 
 typedef struct chainData {
   uint16_t cdTempData[TEMP_SENSOR_COUNT];
@@ -106,21 +118,18 @@ typedef struct icedrifterData {
   uint8_t idcdError;
 #ifdef ARDUINO
   time_t idLastBootTime;
-  time_t idGPSTime; 
+  time_t idGPSTime;
 #else
   uint32_t idLastBootTime;
   uint32_t idGPSTime; 
 #endif // ARDUINO
   float idLatitude;
   float idLongitude;
-  float idAltitude;
-  float idSpeed;
-  float idCourse;
   float idTemperature;
   float idPressure;
   float idRemoteTemp;
 
-#define BASE_RECORD_LENGTH  44 
+  #define BASE_RECORD_LENGTH  32
 
 #ifdef PROCESS_CHAIN_DATA
   chainData idChainData;
