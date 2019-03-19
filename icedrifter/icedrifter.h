@@ -33,28 +33,29 @@
   #include <Time.h>
 #endif // ARDUINO
 
-// The TEST_ALL switch will will collect and send data at bootup
+// ****************************************************************************
+// ***                                                                      ***
+// *** These defines are for debugging only and should be commented out for ***
+// *** normal processing.                                                   ***
+// ***                                                                      ***
+// ****************************************************************************
+//
+// The TEST_ALL switch will collect and send data at bootup
 // and then every hour on the half hour after that.  Comment out
 // the next line to run normally.
 
-#define TEST_ALL  // test as much code a possible at bootup.
+//#define TEST_ALL  // test as much code a possible at bootup.
 
 // The NEVER_TRANSMIT switch does all processing determined by
-// other switches including turning on and initializing the 
+// other switches including turning on and initializing the
 // Rockblock hardware and software but the rockbolock send function
 // is never called
 
-#define NEVER_TRANSMIT  // Do everything except transmit data.
-
-// To help make sure the drifter is set up correctly in the field
-// you can uncomment the next define.  This will try to send a 
-// verification transmit as soon as the device is powered up.
-
-//#define TRANSMIT_AT_BOOT
+//#define NEVER_TRANSMIT  // Do everything except transmit data.
 
 //To turn off the debugging messages, comment out the next line.
 
-#define SERIAL_DEBUG
+//#define SERIAL_DEBUG
 
 //The following defines are used to control what data is transmitted during debugging.
 //If "SERIAL_DEBUG" is not defined they have no effect.
@@ -70,6 +71,16 @@
 #define SERIAL_DEBUG_ROCKBLOCK
 #endif // SERIAL_DEBUG
 
+// ****************************************************************************
+// *** End debugging defines                                                ***
+// ****************************************************************************
+
+// If the next define is uncommented, the device will try to transmit data
+// when the device if first powered up.  This can be usefull for making sure
+// the device is working properly in the field before leaving the area.
+
+#define TRANSMIT_AT_BOOT
+
 // The next define conrtols weather data from the remote temperature sensor
 // are collected and reported.  If the remote temperature sensor is not
 // present, comment out the next line.
@@ -77,22 +88,34 @@
 #define PROCESS_REMOTE_TEMP
 
 #ifdef ARDUINO
+
 // The next define conrtols weather data from the temperature and light
 // sensors are collected and reported.  If the temperature and light
 // chain sensor is not present, comment out the next line.
+#define PROCESS_CHAIN_DATA
 
-//#define PROCESS_CHAIN_DATA
-
+// These defines are used to determine how many sensors are on the temperature and
+// light chain.  They are only used if PROCESS_CHAIN_DATA is defined so you do not
+// need to change them if no chain hardware is attached.
 #define TEMP_SENSOR_COUNT   160
 #define LIGHT_SENSOR_COUNT  64
 
 #else // ARDUINO
 
-// These defines are only used during the compilation of the decoder program.
-// If you change one of these values you will need to recompile the decoder program.
+// ****************************************************************************************
+// These defines are only used during the compilation of the decoder program.  They are
+// set to the maximum values defined by the data chain specification.  The decoder program
+// will only display the amount of data sent from the icedrifter even though these values
+// may be greater than the actual hardware attached, or if no chain hardware is attached.
+// *****************************************************************************************
+// ***                                                                                   ***   
+// *** IF YOU CHANGE ANY OF THESE VALUES YOU WILL NEED TO RECOMPILE THE DECODER PROGRAM. ***
+// ***                                                                                   ***
+// *****************************************************************************************
 #define PROCESS_CHAIN_DATA
 #define TEMP_SENSOR_COUNT   160
 #define LIGHT_SENSOR_COUNT  64
+// *****************************************************************************************
 #endif // ARDUINO
 
 #define MAX_CHAIN_RETRIES 3
@@ -100,7 +123,7 @@
 #define TEMP_DATA_SIZE (TEMP_SENSOR_COUNT * sizeof(uint16_t))
 #define LIGHT_DATA_SIZE ((LIGHT_SENSOR_COUNT * LIGHT_SENSOR_FIELDS) * sizeof(uint16_t))
 
-
+// Chain data definition.
 typedef struct chainData {
   uint16_t cdTempData[TEMP_SENSOR_COUNT];
   uint16_t cdLightData[LIGHT_SENSOR_COUNT][LIGHT_SENSOR_FIELDS];
