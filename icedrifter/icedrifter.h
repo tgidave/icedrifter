@@ -139,6 +139,12 @@ typedef struct icedrifterData {
   uint8_t idTempSensorCount; 
   uint8_t idLightSensorCount;
   uint8_t idcdError;
+
+#define TEMP_CHAIN_TIMEOUT_ERROR  0x01
+#define TEMP_CHAIN_OVERRUN_ERROR  0x02
+#define LIGHT_CHAIN_TIMEOUT_ERROR 0x04
+#define LIGHT_CHAIN_OVERRUN_ERROR 0x08
+
 #ifdef ARDUINO
   time_t idLastBootTime;
   time_t idGPSTime;

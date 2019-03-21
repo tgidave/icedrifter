@@ -165,8 +165,6 @@ void accumulateAndSendData(void) {
   int cdError;
   uint8_t* wkPtr;
 
-
-
   idData.idSwitches = idData.idTempSensorCount = idData.idLightSensorCount = 0;
 
 #ifdef PROCESS_REMOTE_TEMP_SWITCH
@@ -203,7 +201,7 @@ void accumulateAndSendData(void) {
 #ifdef PROCESS_CHAIN_DATA
   chainRetryCount = 0;
 
-  while ((cdError = processChainData((uint8_t*)&idData.idChainData)) != 0) {
+  while ((cdError = processChainData((uint8_t*)&idData.idChainData.cdTempData, (uint8_t*)&idData.idChainData.cdLightData)) != 0) {
     ++chainRetryCount;
     if (chainRetryCount >= MAX_CHAIN_RETRIES) {
       break;

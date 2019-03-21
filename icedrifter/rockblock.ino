@@ -59,7 +59,7 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
 #ifdef SERIAL_DEBUG_ROCKBLOCK
     DEBUG_SERIAL.flush();
     DEBUG_SERIAL.print(F("Transmitting address="));
-    DEBUG_SERIAL.print((long)idPtr);
+    DEBUG_SERIAL.print((long)idPtr, HEX);
     DEBUG_SERIAL.print(F(" length="));
     DEBUG_SERIAL.print(idLen);
     DEBUG_SERIAL.print(F("\r\n"));
@@ -77,26 +77,26 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
       idcChunk.idcRecordType[1] = 'D';
       idcChunk.idcRecordNumber = recCount;
 
-      if (dataLen > MAX_CHUNK_LENGTH) {
-        chunkLen = (MAX_CHUNK_LENGTH + CHUNK_HEADER_SIZE);
-        dataLen -= MAX_CHUNK_LENGTH;
-        dataPtr += MAX_CHUNK_LENGTH;
+      if (dataLen > MAX_CHUNK_DATA_LENGTH) {
+        chunkLen = MAX_CHUNK_LENGTH;
+        dataLen -= MAX_CHUNK_DATA_LENGTH;
       } else {
         chunkLen = (dataLen + CHUNK_HEADER_SIZE);
         dataLen = 0;
       }
 
-      memmove(chunkPtr, idPtr, chunkLen);
+      memmove(chunkPtr, dataPtr, chunkLen);
+      dataPtr += MAX_CHUNK_DATA_LENGTH;
       ++recCount;
 
 #ifdef SERIAL_DEBUG_ROCKBLOCK
       DEBUG_SERIAL.flush();
       DEBUG_SERIAL.print(F("Chunk address="));
-      DEBUG_SERIAL.print((long)chunkPtr);
+      DEBUG_SERIAL.print((long)chunkPtr, HEX);
       DEBUG_SERIAL.print(F(" Chunk length="));
       DEBUG_SERIAL.print(chunkLen);
       DEBUG_SERIAL.print(F("\r\n"));
-      wkPtr = (uint8_t*)&idcChunk;
+      wkPtr = (uint8_t *)&idcChunk;
 
       for (i = 0; i < chunkLen; i++) {
         printHexChar((uint8_t)*wkPtr);
