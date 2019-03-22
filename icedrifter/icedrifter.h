@@ -44,7 +44,7 @@
 // and then every hour on the half hour after that.  Comment out
 // the next line to run normally.
 
-#define TEST_ALL  // test as much code a possible at bootup.
+//#define TEST_ALL  // test as much code a possible at bootup.
 
 // The NEVER_TRANSMIT switch does all processing determined by
 // other switches including turning on and initializing the
@@ -92,7 +92,7 @@
 // The next define controls whether or not data from the temperature and light
 // sensors are collected and reported.  If the temperature and light
 // chain sensor is not present, comment out the next line.
-#define PROCESS_CHAIN_DATA
+//#define PROCESS_CHAIN_DATA
 
 // These defines are used to determine how many sensors are on the temperature and
 // light chain.  They are only used if PROCESS_CHAIN_DATA is defined so you do not
