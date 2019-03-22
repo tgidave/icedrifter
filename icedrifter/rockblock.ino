@@ -134,6 +134,8 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
 
   isbd.sleep();
   rbSerial.end();
+  digitalWrite(ROCKBLOCK_RX_PIN, LOW);
+  digitalWrite(ROCKBLOCK_TX_PIN, LOW);
   digitalWrite(ROCKBLOCK_POWER_PIN, LOW);
 
 #endif // NEVER_TRANSMIT

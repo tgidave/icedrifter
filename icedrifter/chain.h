@@ -6,6 +6,9 @@
 #define CHAIN_RX 2
 #define CHAIN_TX 3
 
-int processChainData(void);
+// Number of minutes to wait while reading chain data before it times out.
+#define CHAIN_READ_TIMEOUT  3UL
+
+int processChainData(uint8_t* tempDataPtr, uint8_t* lightDataPtr);
 
 #endif 

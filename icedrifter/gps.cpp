@@ -101,5 +101,7 @@ else {
 
   GPS_SERIAL.end();
   digitalWrite(GPS_POWER_PIN, LOW);
+  digitalWrite(GPS_RX_PIN, LOW); 
+  digitalWrite(GPS_TX_PIN, LOW); 
   return (fixfnd);
 }

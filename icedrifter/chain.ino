@@ -57,7 +57,7 @@ int processChainData(uint8_t *tempDataPtr, uint8_t *lightDataPtr) {
       ++tmpPtr;
     }
 
-    if ((millis() - startTime) > (2UL * 60UL * 1000UL)) {
+    if ((millis() - startTime) > (CHAIN_READ_TIMEOUT * 60UL * 1000UL)) {
       chainError |= TEMP_CHAIN_TIMEOUT_ERROR;
       break;
     }
@@ -89,6 +89,10 @@ int processChainData(uint8_t *tempDataPtr, uint8_t *lightDataPtr) {
     DEBUG_SERIAL.print(F("\r\n"));
 #endif // SERIAL_DEBUG
 
+    schain.end();
+    digitalWrite(CHAIN_POWER_PIN, LOW);
+    digitalWrite(CHAIN_RX, LOW);
+    digitalWrite(CHAIN_TX, LOW);
     return (chainError);
   }
 
@@ -106,7 +110,7 @@ int processChainData(uint8_t *tempDataPtr, uint8_t *lightDataPtr) {
       ++tmpPtr;
     }
 
-    if ((millis() - startTime) > (2UL * 60UL * 1000UL)) {
+    if ((millis() - startTime) > (CHAIN_READ_TIMEOUT * 60UL * 1000UL)) {
       chainError |= LIGHT_CHAIN_TIMEOUT_ERROR;
       break;
     }
@@ -131,7 +135,7 @@ int processChainData(uint8_t *tempDataPtr, uint8_t *lightDataPtr) {
 #ifdef SERIAL_DEBUG
     DEBUG_SERIAL.print(F("\r\nToo much light data received!!!\r\n"));
 #endif // SERIAL_DEBUG
-  }
+  }  
 
 #ifdef SERIAL_DEBUG
   DEBUG_SERIAL.print(F("\r\nReturning with chainError = "));
@@ -139,7 +143,10 @@ int processChainData(uint8_t *tempDataPtr, uint8_t *lightDataPtr) {
   DEBUG_SERIAL.print(F("\r\n"));
 #endif // SERIAL_DEBUG
 
+  schain.end();
   digitalWrite(CHAIN_POWER_PIN, LOW);
+  digitalWrite(CHAIN_RX, LOW);
+  digitalWrite(CHAIN_TX, LOW);
 
   return (chainError);
 }
