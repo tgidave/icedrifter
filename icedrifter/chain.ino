@@ -6,15 +6,16 @@
 
 SoftwareSerial schain(CHAIN_RX, CHAIN_TX); 
 
-int processChainData(uint8_t *tempDataPtr, uint8_t *lightDataPtr) {
+void processChainData(icedrifterData* idPtr) {
 
   int i = 0;
 
   int chainByteCount;
   int lightByteCount;
-  int totalByteCount;
+//  int totalByteCount;
 
-  uint8_t* tmpPtr;
+  uint8_t* buffPtr;
+  uint8_t* wkPtr;
   uint16_t* wordPtr;
 
   uint32_t startTime;
@@ -39,53 +40,59 @@ int processChainData(uint8_t *tempDataPtr, uint8_t *lightDataPtr) {
   digitalWrite(CHAIN_POWER_PIN, HIGH);
   delay(1000);
 
+  wkPtr = (uint8_t*)&idPtr->idChainData;
+
+  for (i = 0; i < TEMP_DATA_SIZE + LIGHT_DATA_SIZE; ++i) {
+    *wkPtr = 0;
+  }
+
   schain.begin(9600);
   schain.listen();
 
-  tmpPtr = tempDataPtr;
-  chainError = 0;
+  buffPtr = (uint8_t *)&idPtr->idChainData;
+  idPtr->idcdError = 0;
 
   schain.print(F("+1::chain\n"));
   startTime = millis();
   waitSeconds = 0;
-  chainByteCount = 0;
+  idPtr->idTempByteCount = 0;
 
-  while (chainByteCount < (TEMP_DATA_SIZE)) {
+  while (idPtr->idTempByteCount < (TEMP_DATA_SIZE)) {
     if (schain.available()) {
-      *tmpPtr = schain.read();
-      ++chainByteCount;
-      ++tmpPtr;
+      *buffPtr = schain.read();
+      ++buffPtr;
+      ++idPtr->idTempByteCount;
     }
 
-    if ((millis() - startTime) > (CHAIN_READ_TIMEOUT * 60UL * 1000UL)) {
-      chainError |= TEMP_CHAIN_TIMEOUT_ERROR;
+    if ((millis() - startTime) > (TEMP_CHAIN_TIMEOUT_MINUTES * 60UL * 1000UL)) {
+      idPtr->idcdError |= TEMP_CHAIN_TIMEOUT_ERROR;
       break;
     }
   }
 
-  totalByteCount = chainByteCount;
+//  totalByteCount = idPtr->idTempByteCount;
 
 #ifdef SERIAL_DEBUG
   DEBUG_SERIAL.print(F("Received "));
-  DEBUG_SERIAL.print(chainByteCount);
-  DEBUG_SERIAL.print(F(" bytes of chain -data.\r\n"));
+  DEBUG_SERIAL.print(idPtr->idTempByteCount);
+  DEBUG_SERIAL.print(F(" bytes of temp chain data.\r\n"));
 
-  if (chainError != 0) {
+  if (idPtr->idcdError & TEMP_CHAIN_TIMEOUT_ERROR) {
     DEBUG_SERIAL.print(F("\r\nTimeout on temp chain!!!\r\n"));
     DEBUG_SERIAL.print((TEMP_DATA_SIZE));
     DEBUG_SERIAL.print(F(" bytes requested but only "));
-    DEBUG_SERIAL.print(chainByteCount);
+    DEBUG_SERIAL.print(idPtr->idTempByteCount);
     DEBUG_SERIAL.print(F(" bytes received\r\n"));
   }
 #endif // SERIAL_DEBUG
 
   if (schain.available()) {
-    chainError |= TEMP_CHAIN_OVERRUN_ERROR;
+    idPtr->idcdError |= TEMP_CHAIN_OVERRUN_ERROR;
 
 #ifdef SERIAL_DEBUG
     DEBUG_SERIAL.print(F("\r\nToo much chain data received!!!\r\n"));
     DEBUG_SERIAL.print(F("\r\nReturning with chainError = "));
-    DEBUG_SERIAL.print(chainError);
+    DEBUG_SERIAL.print(idPtr->idcdError);
     DEBUG_SERIAL.print(F("\r\n"));
 #endif // SERIAL_DEBUG
 
@@ -93,53 +100,54 @@ int processChainData(uint8_t *tempDataPtr, uint8_t *lightDataPtr) {
     digitalWrite(CHAIN_POWER_PIN, LOW);
     digitalWrite(CHAIN_RX, LOW);
     digitalWrite(CHAIN_TX, LOW);
-    return (chainError);
+    delay(1000);
+    return;
   }
-
-  tmpPtr = lightDataPtr;
 
   schain.print(F("+1::light\n"));
   startTime = millis();
   waitSeconds = 0;
-  lightByteCount = 0;
+  idPtr->idLightByteCount = 0;
 
-  while (lightByteCount < (LIGHT_DATA_SIZE)) {
+  while (idPtr->idLightByteCount < (LIGHT_DATA_SIZE)) {
     if (schain.available()) {
-      *tmpPtr = schain.read();
-      ++lightByteCount;
-      ++tmpPtr;
+      *buffPtr = schain.read();
+      ++idPtr->idLightByteCount;
+      ++buffPtr;
     }
 
-    if ((millis() - startTime) > (CHAIN_READ_TIMEOUT * 60UL * 1000UL)) {
-      chainError |= LIGHT_CHAIN_TIMEOUT_ERROR;
+    if ((millis() - startTime) > (LIGHT_CHAIN_TIMEOUT_MINUTES * 60UL * 1000UL)) {
+      idPtr->idcdError |= LIGHT_CHAIN_TIMEOUT_ERROR;
       break;
     }
   }
 
+//  totalByteCount += idPtr->idLightByteCount;
+
 #ifdef SERIAL_DEBUG
   DEBUG_SERIAL.print(F("Received "));
-  DEBUG_SERIAL.print(lightByteCount);
+  DEBUG_SERIAL.print(idPtr->idLightByteCount);
   DEBUG_SERIAL.print(F(" bytes of light data.\r\n"));
 
   if (chainError != 0) {
     DEBUG_SERIAL.print(F("\r\nTimeout on light chain!!!\r\n"));
-    DEBUG_SERIAL.print((TEMP_DATA_SIZE + LIGHT_DATA_SIZE));
+    DEBUG_SERIAL.print(LIGHT_DATA_SIZE);
     DEBUG_SERIAL.print(F(" bytes requested but only "));
-    DEBUG_SERIAL.print(chainByteCount);
+    DEBUG_SERIAL.print(idPtr->idLightByteCount);
     DEBUG_SERIAL.print(F(" bytes received\r\n"));
   }
 #endif // SERIAL_DEBUG
 
   if (schain.available()) {
-    chainError |= LIGHT_CHAIN_OVERRUN_ERROR;
+    idPtr->idcdError |= LIGHT_CHAIN_OVERRUN_ERROR;
 #ifdef SERIAL_DEBUG
     DEBUG_SERIAL.print(F("\r\nToo much light data received!!!\r\n"));
 #endif // SERIAL_DEBUG
-  }  
+  }
 
 #ifdef SERIAL_DEBUG
-  DEBUG_SERIAL.print(F("\r\nReturning with chainError = "));
-  DEBUG_SERIAL.print(chainError);
+  DEBUG_SERIAL.print(F("\r\nReturning with idData.idcdError = "));
+  DEBUG_SERIAL.print(idPtr->idcdError);
   DEBUG_SERIAL.print(F("\r\n"));
 #endif // SERIAL_DEBUG
 
@@ -147,8 +155,7 @@ int processChainData(uint8_t *tempDataPtr, uint8_t *lightDataPtr) {
   digitalWrite(CHAIN_POWER_PIN, LOW);
   digitalWrite(CHAIN_RX, LOW);
   digitalWrite(CHAIN_TX, LOW);
-
-  return (chainError);
+  delay(1000);
 }
 
 

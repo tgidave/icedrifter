@@ -1,7 +1,7 @@
 #include <SoftwareSerial.h>
 
-#define TEMP_DATA_COUNT   16
-#define LIGHT_DATA_COUNT  8
+#define TEMP_DATA_COUNT   160
+#define LIGHT_DATA_COUNT  63
 #define LIGHT_DATA_FIELDS 4
 
 #define RGB_DATA_FIELDS   3
@@ -60,7 +60,6 @@ void setup() {
   digitalWrite(CHAIN_POWER, HIGH);
   delay(1000);
 
-
   Serial.print("Chain test.\r\n");
 }
 
@@ -75,6 +74,8 @@ void loop() {
 
   bool timeoutError;
   
+  int byteCount;
+    
   uint8_t tmp;
 
   float ltClear;
@@ -85,17 +86,18 @@ void loop() {
 
   
   Serial.print("Loop start\r\n");
-  Serial.flush();
 
-  schain.print("+1::measure\n");
+  schain.print("+1::chain\n");
   startTime = millis();
   timeoutError = false;
   waitSeconds = 0;
+  byteCount = 0;
 
-  while (i < (TEMP_DATA_SIZE + LIGHT_DATA_SIZE)) {
+  while (i < (TEMP_DATA_SIZE)) {
     if (schain.available()) {
-      dataBuff.dbuff[i] = schain.read();
+      dataBuff.tlBuff.tempData[i] = schain.read();
       ++i;
+      ++byteCount;
     }
 
     if ((millis() - startTime) > (2UL * 60UL * 1000UL)) {
@@ -103,6 +105,18 @@ void loop() {
       break;
     }
   }
+
+  if (timeoutError) {
+    Serial.print("\r\n*** Timeout on Temperature chain!!! ***\r\n");
+  } else {
+    Serial.print("\r\nTemperature chain transfer took ");
+    Serial.print((millis() - startTime) / 1000);
+    Serial.print(" seconds.\r\n");
+  }
+
+  Serial.print("\r\nRead ");
+  Serial.print(byteCount);
+  Serial.print(" bytes of temperature data.\r\n");
 
   if (timeoutError == false) {
 
@@ -126,6 +140,43 @@ void loop() {
       }
       Serial.print("\r\n");
     }
+
+    Serial.print("\r\nSending light data request.\r\n");
+    schain.print("+1::light\n");
+    startTime = millis();
+    timeoutError = false;
+    waitSeconds = 0;
+    byteCount = 0;
+    i = 0;
+
+    Serial.print("\r\nWaiting for ");
+    Serial.print(LIGHT_DATA_SIZE);
+    Serial.print(" bytes of light data.\r\n");
+
+    while (i < LIGHT_DATA_SIZE) {
+      if (schain.available()) {
+        dataBuff.tlBuff.lightData[i] = schain.read();
+        ++i;
+        ++byteCount;
+      }
+
+      if ((millis() - startTime) > (3UL * 60UL * 1000UL)) {
+        timeoutError = true;
+        break;
+      }
+    }
+
+    if (timeoutError) {
+      Serial.print("\r\n*** Timeout on light chain!!! ***\r\n");
+    } else {
+      Serial.print("\r\nLight chain transfer took ");
+      Serial.print((millis() - startTime) / 1000);
+      Serial.print(" seconds.\r\n");
+    }
+
+    Serial.print("\r\nRead ");
+    Serial.print(byteCount);
+    Serial.print(" bytes of lignt data.\r\n"); 
 
     Serial.print("\r\nRaw light data converted to little endian\r\n");
 

@@ -162,10 +162,11 @@ void accumulateAndSendData(void) {
   int chainRetryCount;
   int totalDataLength;
   int recCount;
-  int cdError;
   uint8_t* wkPtr;
 
-  idData.idSwitches = idData.idTempSensorCount = idData.idLightSensorCount = 0;
+
+  totalDataLength = BASE_RECORD_LENGTH;
+  idData.idSwitches = idData.idTempByteCount = idData.idLightByteCount = idData.idcdError = 0;
 
 #ifdef PROCESS_REMOTE_TEMP_SWITCH
   idData.idSwitches |= PROCESS_REMOTE_TEMP_SWITCH;
@@ -173,13 +174,8 @@ void accumulateAndSendData(void) {
 
 #ifdef PROCESS_CHAIN_DATA
   idData.idSwitches |= PROCESS_CHAIN_DATA_SWITCH;
-  idData.idTempSensorCount = TEMP_SENSOR_COUNT;
-  idData.idLightSensorCount = LIGHT_SENSOR_COUNT;
+  idData.idTempByteCount = idData.idLightByteCount = 0;
 #endif // PROCESS_CHAIN_DATA
-
-#ifdef SEND_RGB
-  idData.idSwitches |= SEND_RGB_SWITCH;
-#endif // SEND_RGB
 
   idData.idLastBootTime = lbTime;
 
@@ -197,30 +193,10 @@ void accumulateAndSendData(void) {
   idData.idRemoteTemp = 0;
 #endif // PROCESS_REMOTE_TEMP
 
-  cdError = 0;
 #ifdef PROCESS_CHAIN_DATA
-  chainRetryCount = 0;
-
-  while ((cdError = processChainData((uint8_t*)&idData.idChainData.cdTempData, (uint8_t*)&idData.idChainData.cdLightData)) != 0) {
-    ++chainRetryCount;
-    if (chainRetryCount >= MAX_CHAIN_RETRIES) {
-      break;
-    }
-  }
-
-#endif // PROCESS_CHAIN_DATA
-  idData.idcdError = cdError;
-  totalDataLength = BASE_RECORD_LENGTH;
-
-#ifdef PROCESS_CHAIN_DATA
-  if (cdError == 0) {
-    totalDataLength += (TEMP_DATA_SIZE + LIGHT_DATA_SIZE);
-  } else {
-    idData.idSwitches &= ~PROCESS_CHAIN_DATA_SWITCH;  // Since no chain data is being sent, turn off the process chain data switch.
-  }
-
+  processChainData(&idData);
+  totalDataLength += (idData.idTempByteCount + idData.idLightByteCount);
 #endif  // PROCESS_CHAIN_DATA
-
 
   wkPtr = (uint8_t*)&idData;
 

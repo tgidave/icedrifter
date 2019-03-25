@@ -5,8 +5,8 @@
 #define CHAIN_TX 3
 #define CHAIN_POWER_PIN 1
 
-#define BUFF_SIZE 1024
+//#define BUFF_SIZE 2048
 
-void getChainData(void);
+void processChainData(icedrifterData* idPtr);
 
 #endif // _CHAINS_H

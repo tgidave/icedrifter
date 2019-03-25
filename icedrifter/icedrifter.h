@@ -44,7 +44,7 @@
 // and then every hour on the half hour after that.  Comment out
 // the next line to run normally.
 
-//#define TEST_ALL  // test as much code a possible at bootup.
+#define TEST_ALL  // test as much code a possible at bootup.
 
 // The NEVER_TRANSMIT switch does all processing determined by
 // other switches including turning on and initializing the
@@ -55,7 +55,7 @@
 
 //To turn off the debugging messages, comment out the next line.
 
-//#define SERIAL_DEBUG
+#define SERIAL_DEBUG
 
 //The following defines are used to control what data is transmitted during debugging.
 //If "SERIAL_DEBUG" is not defined they have no effect.
@@ -92,13 +92,17 @@
 // The next define controls whether or not data from the temperature and light
 // sensors are collected and reported.  If the temperature and light
 // chain sensor is not present, comment out the next line.
-//#define PROCESS_CHAIN_DATA
+#define PROCESS_CHAIN_DATA
 
 // These defines are used to determine how many sensors are on the temperature and
 // light chain.  They are only used if PROCESS_CHAIN_DATA is defined so you do not
 // need to change them if no chain hardware is attached.
 #define TEMP_SENSOR_COUNT   160
-#define LIGHT_SENSOR_COUNT  64
+#define LIGHT_SENSOR_COUNT  63
+
+// Minutes to wait for data during chain reads.
+#define TEMP_CHAIN_TIMEOUT_MINUTES 3UL
+#define LIGHT_CHAIN_TIMEOUT_MINUTES 3UL
 
 #else // ARDUINO
 
@@ -118,7 +122,13 @@
 // *****************************************************************************************
 #endif // ARDUINO
 
-#define MAX_CHAIN_RETRIES 3
+// Minutes to wait for data during chain reads.
+#define TEMP_CHAIN_TIMEOUT_MINUTES 3UL
+#define LIGHT_CHAIN_TIMEOUT_MINUTES 3UL
+
+// Chain retries disabled.
+#define MAX_CHAIN_RETRIES 0
+
 #define LIGHT_SENSOR_FIELDS 4
 #define TEMP_DATA_SIZE (TEMP_SENSOR_COUNT * sizeof(uint16_t))
 #define LIGHT_DATA_SIZE ((LIGHT_SENSOR_COUNT * LIGHT_SENSOR_FIELDS) * sizeof(uint16_t))
@@ -135,15 +145,18 @@ typedef struct icedrifterData {
 
 #define PROCESS_REMOTE_TEMP_SWITCH  0x01
 #define PROCESS_CHAIN_DATA_SWITCH   0x02
-
-  uint8_t idTempSensorCount; 
-  uint8_t idLightSensorCount;
-  uint8_t idcdError;
+  
+  uint8_t idcdError; 
 
 #define TEMP_CHAIN_TIMEOUT_ERROR  0x01
 #define TEMP_CHAIN_OVERRUN_ERROR  0x02
 #define LIGHT_CHAIN_TIMEOUT_ERROR 0x04
 #define LIGHT_CHAIN_OVERRUN_ERROR 0x08
+
+  uint16_t idTempByteCount; 
+  uint16_t idLightByteCount;
+
+  uint16_t idSpare;
 
 #ifdef ARDUINO
   time_t idLastBootTime;
@@ -152,13 +165,14 @@ typedef struct icedrifterData {
   uint32_t idLastBootTime;
   uint32_t idGPSTime; 
 #endif // ARDUINO
+
   float idLatitude;
   float idLongitude;
   float idTemperature;
   float idPressure;
   float idRemoteTemp;
 
-  #define BASE_RECORD_LENGTH  32
+  #define BASE_RECORD_LENGTH  36
 
 #ifdef PROCESS_CHAIN_DATA
   chainData idChainData;
