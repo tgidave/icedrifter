@@ -4,6 +4,8 @@
 #include "icedrifter.h"
 #include "chain.h"
 
+#ifdef PROCESS_CHAIN_DATA
+
 SoftwareSerial schain(CHAIN_RX, CHAIN_TX); 
 
 void processChainData(icedrifterData* idPtr) {
@@ -158,4 +160,5 @@ void processChainData(icedrifterData* idPtr) {
   delay(1000);
 }
 
+#endif // PROCESS_CHAIN_DATA
 

@@ -138,25 +138,27 @@ int main(int argc, char** argv) {
       printf("remote temp: %f C\r\n\r\n", idData.idRemoteTemp);
     }
 
-    for( i = 0; i < TEMP_SENSOR_COUNT; ++i) {
-      printf("Chain temperature sensor %3d = %f\r\n", i, convertTempToC(idData.idChainData.cdTempData[i]));
-    }
-
-    printf("\r\n");
-
-    for( i = 0; i < LIGHT_SENSOR_COUNT; ++i) {
-      if (idData.idChainData.cdLightData[i][0] == 0) {
-        rgbRed = rgbGreen = rgbBlue = 0;
-      } else {
-        ltClear = (uint32_t)idData.idChainData.cdLightData[i][0];
-        rgbRed = (float)idData.idChainData.cdLightData[i][1] / ltClear * 255.0;
-        rgbGreen = (float)idData.idChainData.cdLightData[i][2] / ltClear * 255.0;
-        rgbBlue = (float)idData.idChainData.cdLightData[i][3] / ltClear * 255.0;
+    if (idData.idSwitches & PROCESS_CHAIN_DATA_SWITCH) {
+      for (i = 0; i < TEMP_SENSOR_COUNT; ++i) {
+        printf("Chain temperature sensor %3d = %f\r\n", i, convertTempToC(idData.idChainData.cdTempData[i]));
       }
 
-      printf("Chain light sensor %2d = %5hu %5hu %5hu %5hu  RGB %3d %3d %3d\r\n", i,
-             idData.idChainData.cdLightData[i][0], idData.idChainData.cdLightData[i][1], idData.idChainData.cdLightData[i][2], idData.idChainData.cdLightData[i][3],
-             rgbRed, rgbGreen, rgbBlue);
+      printf("\r\n");
+
+      for (i = 0; i < LIGHT_SENSOR_COUNT; ++i) {
+        if (idData.idChainData.cdLightData[i][0] == 0) {
+          rgbRed = rgbGreen = rgbBlue = 0;
+        } else {
+          ltClear = (uint32_t)idData.idChainData.cdLightData[i][0];
+          rgbRed = (float)idData.idChainData.cdLightData[i][1] / ltClear * 255.0;
+          rgbGreen = (float)idData.idChainData.cdLightData[i][2] / ltClear * 255.0;
+          rgbBlue = (float)idData.idChainData.cdLightData[i][3] / ltClear * 255.0;
+        }
+
+        printf("Chain light sensor %2d = %5hu %5hu %5hu %5hu  RGB %3d %3d %3d\r\n", i,
+               idData.idChainData.cdLightData[i][0], idData.idChainData.cdLightData[i][1], idData.idChainData.cdLightData[i][2], idData.idChainData.cdLightData[i][3],
+               rgbRed, rgbGreen, rgbBlue);
+      }
     }
   }
 
