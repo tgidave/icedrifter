@@ -91,12 +91,12 @@ int main(int argc, char** argv) {
     if (idData.idSwitches & PROCESS_CHAIN_DATA_SWITCH) {
       if (idData.idTempByteCount > 0) {
         memmove((char*)&idData.idChainData.cdTempData, wkPtr, idData.idTempByteCount);
-        wkPtr = (char *)&idData.idChainData.cdTempData;
+//        wkPtr = (char *)&idData.idChainData.cdTempData;
       }
 
       wkPtr += idData.idTempByteCount;
 
-      if (idData.idLightByteCount != 0) {
+      if (idData.idLightByteCount > 0) {
         memmove((char*)&idData.idChainData.cdLightData, wkPtr, idData.idLightByteCount);
       }
     }
@@ -128,6 +128,9 @@ int main(int argc, char** argv) {
       }
       printf("\r\n");
     }
+
+    printf("Temp chain bytes received %d\r\n", idData.idTempByteCount);
+    printf("Light chain bytes received %d\r\n\r\n", idData.idLightByteCount);
 
     printf("latitude:    %f\r\n", idData.idLatitude);
     printf("longitude:   %f\r\n", idData.idLongitude);

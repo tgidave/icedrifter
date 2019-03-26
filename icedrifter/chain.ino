@@ -65,16 +65,16 @@ void processChainData(icedrifterData* idPtr) {
       *buffPtr = schain.read();
       ++buffPtr;
       ++idPtr->idTempByteCount;
-#ifdef SERIAL_DEBUG
-      DEBUG_SERIAL.print(F("."));
-#endif // SERIAL_DEBUG
+//#ifdef SERIAL_DEBUG
+//      DEBUG_SERIAL.print(F("."));
+//#endif // SERIAL_DEBUG
     }
 
     if ((millis() - startTime) > (TEMP_CHAIN_TIMEOUT_MINUTES * 60UL * 1000UL)) {
       idPtr->idcdError |= TEMP_CHAIN_TIMEOUT_ERROR;
-#ifdef SERIAL_DEBUG
-      DEBUG_SERIAL.print(F("\r\nchain Timeout.\r\n"));
-#endif // SERIAL_DEBUG
+//#ifdef SERIAL_DEBUG
+//      DEBUG_SERIAL.print(F("\r\nchain Timeout.\r\n"));
+//#endif // SERIAL_DEBUG
       break;
     }
   }

@@ -98,7 +98,7 @@
 // light chain.  They are only used if PROCESS_CHAIN_DATA is defined so you do not
 // need to change them if no chain hardware is attached.
 #define TEMP_SENSOR_COUNT   160
-#define LIGHT_SENSOR_COUNT  63
+#define LIGHT_SENSOR_COUNT  64
 
 // Minutes to wait for data during chain reads.
 #define TEMP_CHAIN_TIMEOUT_MINUTES 3UL
