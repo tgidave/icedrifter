@@ -92,7 +92,7 @@
 // The next define controls whether or not data from the temperature and light
 // sensors are collected and reported.  If the temperature and light
 // chain sensor is not present, comment out the next line.
-#define PROCESS_CHAIN_DATA
+//#define PROCESS_CHAIN_DATA
 
 // These defines are used to determine how many sensors are on the temperature and
 // light chain.  They are only used if PROCESS_CHAIN_DATA is defined so you do not
