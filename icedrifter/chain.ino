@@ -37,7 +37,11 @@ void processChainData(icedrifterData* idPtr) {
 #endif // SERIAL_DEBUG
 
   digitalWrite(CHAIN_POWER_PIN, HIGH);
-  delay(1000);
+
+  // 90 second delay for the chain hardware to initialize.
+  for(i = 0; i < 90; ++i) {
+    delay(1000);
+  }
 
   wkPtr = (uint8_t*)&idPtr->idChainData;
 
