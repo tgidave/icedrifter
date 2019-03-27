@@ -14,7 +14,6 @@ void processChainData(icedrifterData* idPtr) {
 
   int chainByteCount;
   int lightByteCount;
-//  int totalByteCount;
 
   uint8_t* buffPtr;
   uint8_t* wkPtr;
@@ -47,6 +46,7 @@ void processChainData(icedrifterData* idPtr) {
   }
 
   schain.begin(9600);
+  schain.flush();
   schain.listen();
 
   buffPtr = (uint8_t *)&idPtr->idChainData;
@@ -56,30 +56,18 @@ void processChainData(icedrifterData* idPtr) {
   startTime = millis();
   idPtr->idTempByteCount = 0;
 
-#ifdef SERIAL_DEBUG
-      DEBUG_SERIAL.print(F("\r\n"));
-#endif // SERIAL_DEBUG
-
   while (idPtr->idTempByteCount < (TEMP_DATA_SIZE)) {
     if (schain.available()) {
       *buffPtr = schain.read();
       ++buffPtr;
       ++idPtr->idTempByteCount;
-//#ifdef SERIAL_DEBUG
-//      DEBUG_SERIAL.print(F("."));
-//#endif // SERIAL_DEBUG
     }
 
     if ((millis() - startTime) > (TEMP_CHAIN_TIMEOUT_MINUTES * 60UL * 1000UL)) {
       idPtr->idcdError |= TEMP_CHAIN_TIMEOUT_ERROR;
-//#ifdef SERIAL_DEBUG
-//      DEBUG_SERIAL.print(F("\r\nchain Timeout.\r\n"));
-//#endif // SERIAL_DEBUG
       break;
     }
   }
-
-//  totalByteCount = idPtr->idTempByteCount;
 
 #ifdef SERIAL_DEBUG
   DEBUG_SERIAL.print(F("Received "));
@@ -105,6 +93,7 @@ void processChainData(icedrifterData* idPtr) {
     DEBUG_SERIAL.print(F("\r\n"));
 #endif // SERIAL_DEBUG
 
+    schain.flush();
     schain.end();
     digitalWrite(CHAIN_POWER_PIN, LOW);
     digitalWrite(CHAIN_RX, LOW);
@@ -116,6 +105,7 @@ void processChainData(icedrifterData* idPtr) {
   schain.print(F("+1::light\n"));
   startTime = millis();
   idPtr->idLightByteCount = 0;
+
 
   while (idPtr->idLightByteCount < (LIGHT_DATA_SIZE)) {
     if (schain.available()) {
@@ -159,6 +149,7 @@ void processChainData(icedrifterData* idPtr) {
   DEBUG_SERIAL.print(F("\r\n"));
 #endif // SERIAL_DEBUG
 
+  schain.flush();
   schain.end();
   digitalWrite(CHAIN_POWER_PIN, LOW);
   digitalWrite(CHAIN_RX, LOW);
