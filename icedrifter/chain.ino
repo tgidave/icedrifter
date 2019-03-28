@@ -38,8 +38,8 @@ void processChainData(icedrifterData* idPtr) {
 
   digitalWrite(CHAIN_POWER_PIN, HIGH);
 
-  // 90 second delay for the chain hardware to initialize.
-  for(i = 0; i < 90; ++i) {
+  // 15 second delay for the chain hardware to initialize.
+  for(i = 0; i < 15; ++i) {
     delay(1000);
   }
 
@@ -100,8 +100,10 @@ void processChainData(icedrifterData* idPtr) {
     schain.flush();
     schain.end();
     digitalWrite(CHAIN_POWER_PIN, LOW);
+#ifdef DROP_CHAIN_RX_TX
     digitalWrite(CHAIN_RX, LOW);
     digitalWrite(CHAIN_TX, LOW);
+#endif // DROP_CHAIN_RX_TX
     delay(1000);
     return;
   }
@@ -156,8 +158,10 @@ void processChainData(icedrifterData* idPtr) {
   schain.flush();
   schain.end();
   digitalWrite(CHAIN_POWER_PIN, LOW);
+#ifdef DROP_CHAIN_RX_TX
   digitalWrite(CHAIN_RX, LOW);
   digitalWrite(CHAIN_TX, LOW);
+#endif // DROP_CHAIN_RX_TX
   delay(1000);
 }
 
