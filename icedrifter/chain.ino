@@ -49,6 +49,8 @@ void processChainData(icedrifterData* idPtr) {
     *wkPtr = 0;
   }
 
+  schain = SoftwareSerial(CHAIN_RX, CHAIN_TX); 
+
   schain.begin(9600);
   schain.flush();
   schain.listen();
