@@ -94,7 +94,7 @@
 // chain sensor is not present, comment out the next line.
 #define PROCESS_CHAIN_DATA
 
-//#define DROP_CHAIN_RX_TX
+#define DROP_CHAIN_RX_TX
 
 // These defines are used to determine how many sensors are on the temperature and
 // light chain.  They are only used if PROCESS_CHAIN_DATA is defined so you do not
