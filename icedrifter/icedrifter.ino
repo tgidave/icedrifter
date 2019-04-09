@@ -62,8 +62,8 @@ const bool timeToReport[24] = {
   false,  // 04:00 UTC
   false,  // 05:00 UTC
   false,  // 06:00 UTC
-  true,   // 07:00 UTC - Midnight Mountain standard time
-  false,  // 08:00 UTC
+  false,  // 07:00 UTC - Midnight Mountain standard time
+  true,   // 08:00 UTC
   false,  // 09:00 UTC
   false,  // 10:00 UTC
   false,  // 11:00 UTC
@@ -74,8 +74,8 @@ const bool timeToReport[24] = {
   false,  // 16:00 UTC
   false,  // 17:00 UTC
   false,  // 18:00 UTC
-  true,   // 19:00 UTC - Noon Mountain standard time
-  false,  // 20:00 UTC
+  false,  // 19:00 UTC - Noon Mountain standard time
+  true,   // 20:00 UTC
   false,  // 21:00 UTC
   false,  // 22:00 UTC
   false,  // 23:00 UTC

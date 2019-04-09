@@ -121,6 +121,7 @@
 #define PROCESS_CHAIN_DATA
 #define TEMP_SENSOR_COUNT   160
 #define LIGHT_SENSOR_COUNT  64
+#define MAX_RECORD_LENGTH   340
 // *****************************************************************************************
 #endif // ARDUINO
 

@@ -14,7 +14,11 @@
 #define MAX_CHUNK_DATA_LENGTH (MAX_CHUNK_LENGTH - CHUNK_HEADER_SIZE)
 
 typedef struct iceDrifterChunk {
+#ifdef ARDUINO
   time_t idcSendTime;
+#else
+  uint32_t idcSendTime;
+#endif
   char idcRecordType[2];
   uint16_t idcRecordNumber;
   uint8_t idcBuffer[MAX_CHUNK_LENGTH];

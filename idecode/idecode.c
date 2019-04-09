@@ -33,7 +33,6 @@ int main(int argc, char** argv) {
   char hb1;
   char hb2;
   char buffHold;
-//  int dataLen;
   struct tm* timeInfo;
   time_t tempTime;
 
@@ -91,7 +90,6 @@ int main(int argc, char** argv) {
     if (idData.idSwitches & PROCESS_CHAIN_DATA_SWITCH) {
       if (idData.idTempByteCount > 0) {
         memmove((char*)&idData.idChainData.cdTempData, wkPtr, idData.idTempByteCount);
-//        wkPtr = (char *)&idData.idChainData.cdTempData;
       }
 
       wkPtr += idData.idTempByteCount;
