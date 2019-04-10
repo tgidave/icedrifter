@@ -23,15 +23,16 @@ uint8_t rgbBlue;
 //void convertStringToStruct(char* charPtr);
 
 int decodeData(void);
-int getDataByFile(char **);
-int getDataByChar(char **, int);
-int getDataByChunk(char **, int);
+int getDataByFile(char**);
+int getDataByChar(char**, int);
+int getDataByChunk(char**, int);
 //int getDataInDirectory(char *);
 char convertCharToHex(char);
-void convertBigEndianToLittleEndian(char *sPtr, int size);
+void convertBigEndianToLittleEndian(char* sPtr, int size);
 float convertTempToC(short temp);
+int saveData(char* baseName);
 
-int main(int argc, char **argv) {
+  int main(int argc, char** argv) {
 //  char *cunkPtr;
 //  char *wkPtr;
 //  int argIx;
@@ -42,44 +43,44 @@ int main(int argc, char **argv) {
 //  struct tm *timeInfo;
 //  time_t tempTime;
 
-  if (argc == 1) {
-    printf("\r\nError: No arguments specified!!!\r\n");
-    printf("Help will appear here!!!\r\n");
-    exit(1);
-  }
-
-  if (argv[1][0] == '-') {
-    switch (argv[1][1]) {
-    case 'c':
-      if (getDataByChunk(&argv[2], argc - 2) != 0) {
-        exit(1);
-      }
-      break;
-    case 'f':
-      if (getDataByFile(&argv[2]) != 0) {
-        exit(1);
-      }
-      break;
-    case 'h':
-      printf("Help will appear here!!!\r\n");
-      exit(0);
-    default:
-      printf("Invalid switch!!!\r\n");
+    if (argc == 1) {
+      printf("\r\nError: No arguments specified!!!\r\n");
       printf("Help will appear here!!!\r\n");
       exit(1);
     }
-  } else {
-    if (getDataByChar(&argv[1], argc - 1) != 0) {
-      exit(1);
+
+    if (argv[1][0] == '-') {
+      switch (argv[1][1]) {
+        case 'c':
+          if (getDataByChunk(&argv[2], argc - 2) != 0) {
+            exit(1);
+          }
+          break;
+        case 'f':
+          if (getDataByFile(&argv[2]) != 0) {
+            exit(1);
+          }
+          break;
+        case 'h':
+          printf("Help will appear here!!!\r\n");
+          exit(0);
+        default:
+          printf("Invalid switch!!!\r\n");
+          printf("Help will appear here!!!\r\n");
+          exit(1);
+      }
+    } else {
+      if (getDataByChar(&argv[1], argc - 1) != 0) {
+        exit(1);
+      }
     }
   }
-}
 
-int getDataByChar(char **data, int cnt) {
-  char *cunkPtr;
-  char *wkPtr;
-  iceDrifterChunk *idcPtr;
-  char *recPtr;
+int getDataByChar(char** data, int cnt) {
+  char* cunkPtr;
+  char* wkPtr;
+  iceDrifterChunk* idcPtr;
+  char* recPtr;
   int recNum;
   int dataIx;
   int i;
@@ -87,7 +88,7 @@ int getDataByChar(char **data, int cnt) {
   char hb1;
   char hb2;
   char buffHold;
-  struct tm *timeInfo;
+  struct tm* timeInfo;
   uint32_t tempTime;
   uint32_t timeHold;
   bool gotDate;
@@ -133,7 +134,7 @@ int getDataByChar(char **data, int cnt) {
       dataIx += 2;
     }
 
-    idcPtr = (iceDrifterChunk *)buff;
+    idcPtr = (iceDrifterChunk*)buff;
 
     if (!((idcPtr->idcRecordType[0] == 'I') && (idcPtr->idcRecordType[1] == 'D'))) {
       printf("Record ID not = \"ID\"!!!\r\n");
@@ -150,7 +151,7 @@ int getDataByChar(char **data, int cnt) {
       gotDate = true;
     }
 
-    recPtr = (char *)&idData;
+    recPtr = (char*)&idData;
 
     if (idcPtr->idcRecordNumber == 1) {
       recPtr += sizeof(idcPtr->idcBuffer);
@@ -158,18 +159,18 @@ int getDataByChar(char **data, int cnt) {
       recPtr += sizeof(idcPtr->idcBuffer) * 2;
     }
 
-    wkPtr = idcPtr->idcBuffer;
+    wkPtr = (char*)idcPtr->idcBuffer;
     memmove(recPtr, wkPtr, recLen);
   }
 
-  convertBigEndianToLittleEndian((char *)&idData.idChainData, sizeof(idData.idChainData));
+  convertBigEndianToLittleEndian((char*)&idData.idChainData, sizeof(idData.idChainData));
 
   return (decodeData());
 }
 
 int decodeData() {
 
-  struct tm *timeInfo;
+  struct tm* timeInfo;
   time_t tempTime;
   int i;
 
@@ -248,7 +249,7 @@ char convertCharToHex(char chr) {
   return (0xFF);
 }
 
-void convertBigEndianToLittleEndian(char *sPtr, int size) {
+void convertBigEndianToLittleEndian(char* sPtr, int size) {
   char tmp;
   int i;
 
@@ -268,16 +269,16 @@ float convertTempToC(short temp) {
   return ((float)temp / 128.0);
 }
 
-int getDataByFile(char **fnl) {
-  int recordSize;
+int getDataByFile(char** fnl) {
+  size_t recordSize;
   int i;
-  char **argIx;
-  iceDrifterChunk *idcPtr;
-  FILE *fd;
-  char *wkPtr;
+  char** argIx;
+  iceDrifterChunk* idcPtr;
+  FILE* fd;
+  char* wkPtr;
   char fileBuffer[MAX_RECORD_LENGTH];
 
-  wkPtr = (char *)&idData;
+  wkPtr = (char*)&idData;
   argIx = fnl;
 
   for (i = 0; i < (BASE_RECORD_LENGTH + TEMP_DATA_SIZE + LIGHT_DATA_SIZE); ++i) {
@@ -291,93 +292,128 @@ int getDataByFile(char **fnl) {
     exit(1);
   }
 
-  if ((recordSize = fread(fileBuffer, sizeof(char), MAX_RECORD_LENGTH, fd) == 0)) {
+  if ((fread((char *)&idData, sizeof(idData), 1, fd) == 0)) {
     printf("Error reading data file %s!\r\n", argIx[0]);
-    printf("idecode terminating.\r\n");
+    printf("idecode2 terminating.\r\n");
     fclose(fd);
     exit(1);
   }
 
   fclose(fd);
-
-  idcPtr = (iceDrifterChunk *)&fileBuffer;
-
-//      if (rcordSize != BASE_RECORD_LENGTH + CHUNK_HEADER_SIZE) {
-//        printf("Invalid record size!  Expected %d bytes but recieved %d bytes!\r\n",
-//               BASE_RECORD_LENGTH + CHUNK_HEADER_SIZE, recordLength);
-//        printf("idecode terminating.\r\n");
-//        exit(1);
-//      }
-
-  if (!((idcPtr->idcRecordType[0] == 'I') &&
-        (idcPtr->idcRecordType[1] == 'D'))) {
-    printf("Invalid record! Chnk header - not \"IDxx\"!\r\n");
-    exit(1);
-  }
-
-  wkPtr = (char *)&idData;
-  memmove(wkPtr, (char *)&idcPtr->idcBuffer, recordSize);
   decodeData();
 }
 
-int getDataByChunk(char **fnl, int cnt) {
+int getDataByChunk(char** fnl, int cnt) {
+  char** argIx;
+  iceDrifterChunk* idcPtr;
+  FILE* fd;
+  int recordTime;
   int recordSize;
   int i;
-  char **argIx;
-  iceDrifterChunk *idcPtr;
-  FILE *fd;
-  char *wkPtr;
+  bool firstTime;
+  bool dashFound;
+  char* wkPtr;
+  char fnHold[256];
+  char fileName[256];
   char fileBuffer[MAX_RECORD_LENGTH];
 
-  wkPtr = (char *)&idData;
+  wkPtr = (char*)&idData;
   argIx = fnl;
+  firstTime = true;
+  fileName[0] = 0;
 
   for (i = 0; i < (BASE_RECORD_LENGTH + TEMP_DATA_SIZE + LIGHT_DATA_SIZE); ++i) {
-    *wkPtr - 0;
+    *wkPtr = 0;
+    ++wkPtr;
   }
 
   for (i = 0; i < cnt; ++i) {
 
-  if ((fd = fopen(argIx[i], "r")) == NULL) {
-    printf("Error opening input file %s!\r\n", argIx[0]);
-    printf("idecode terminating.\r\n");
-    fclose(fd);
-    exit(1);
-  }
+    strcpy(fnHold, argIx[i]);
+    wkPtr = fnHold;
+    dashFound = false;
 
-    if ((recordSize = fread(fileBuffer, sizeof(char), MAX_RECORD_LENGTH, fd) == 0)) {
-      printf("Error reading data file %s!\r\n", argIx[0]);
+    while (*wkPtr != 0) {
+      if (*wkPtr == '-') {
+        dashFound = true;
+        *wkPtr = 0;
+        if (fileName[0] == 0) {
+          strcpy(fileName, fnHold);
+          printf("Processing data for Rockblock %s.\r\n", fileName);
+        } else {
+          if (strcmp(fileName, fnHold) != 0) {
+            printf("Error: File %d Rockblock name not equal previous file(s)!", i);
+            printf("idecode terminating.\r\n");
+            exit(1);
+          }
+        }
+      }
+      if (dashFound = false) {
+        printf("Error: Invalid Icedrifter file name = %s!", argIx[i]);
+        printf("idecode terminating.\r\n");
+        exit(1);
+      }
+      ++wkPtr;
+    }
+
+    if ((fd = fopen(argIx[i], "r")) == NULL) {
+      printf("Error opening input file %s!\r\n", argIx[0]);
       printf("idecode terminating.\r\n");
       fclose(fd);
       exit(1);
     }
 
-    idcPtr = (iceDrifterChunk *)&fileBuffer;
+    fseek(fd, 0, SEEK_END);
 
-    //      if (rcordSize != BASE_RECORD_LENGTH + CHUNK_HEADER_SIZE) {
-    //        printf("Invalid record size!  Expected %d bytes but recieved %d bytes!\r\n",
-    //               BASE_RECORD_LENGTH + CHUNK_HEADER_SIZE, recordLength);
-    //        printf("idecode terminating.\r\n");
-    //        exit(1);
-    //      }
+    recordSize = ftell(fd);
 
-    if (!((idcPtr->idcRecordType[0] == 'I') &&
-          (idcPtr->idcRecordType[1] == 'D'))) {
-      printf("Invalid record! Chnk header - not \"IDxx\"!\r\n");
+    if ((recordSize == 0) || (recordSize > MAX_CHUNK_LENGTH)) {
+      printf("Error: Record size zero or too long = %d!!!\r\n", recordSize);
+      printf("idecode terminating.\r\n");
+      fclose(fd);
       exit(1);
     }
 
+    fseek(fd, 0, SEEK_SET);
+
+    if (fread(fileBuffer, recordSize, 1, fd) == 0) {
+      printf("Error reading data file!\r\n");
+      printf("idecode terminating.\r\n");
+      fclose(fd);
+      exit(1);
+    }
+
+    idcPtr = (iceDrifterChunk*)&fileBuffer;
+
+    if (!((idcPtr->idcRecordType[0] == 'I') &&
+          (idcPtr->idcRecordType[1] == 'D'))) {
+      printf("Invalid record! Chunk header - not \"IDxx\"!\r\n");
+      exit(1);
+    }
+
+    if (firstTime) {
+      recordTime = idcPtr->idcSendTime;
+      firstTime = false;
+    } else {
+      if (idcPtr->idcSendTime != recordTime) {
+        printf("Error: Sent time of record %d does not equal sent time of first record!\r\n", i + 1);
+        printf("idecode terminating.\r\n");
+        fclose(fd);
+        exit(1);
+      }
+    }
+
     if (idcPtr->idcRecordNumber == 0) {
-      wkPtr = (char *)&idData;
-      memmove(wkPtr, (char *)&idcPtr->idcBuffer, recordSize - CHUNK_HEADER_SIZE);
+      wkPtr = (char*)&idData;
+      memmove(wkPtr, (char*)&idcPtr->idcBuffer, recordSize - CHUNK_HEADER_SIZE);
     } else if (idcPtr->idcRecordNumber == 1) {
-      wkPtr = (char *)&idData;
+      wkPtr = (char*)&idData;
       wkPtr += MAX_CHUNK_DATA_LENGTH;
-      memmove(wkPtr, (char *)&idcPtr->idcBuffer, recordSize - CHUNK_HEADER_SIZE);
+      memmove(wkPtr, (char*)&idcPtr->idcBuffer, recordSize - CHUNK_HEADER_SIZE);
     } else if (idcPtr->idcRecordNumber == 2) {
-      wkPtr = (char *)&idData;
+      wkPtr = (char*)&idData;
       wkPtr += (MAX_CHUNK_DATA_LENGTH * 2);
-      memmove(wkPtr, (char *)&idcPtr->idcBuffer, recordSize - CHUNK_HEADER_SIZE);
+      memmove(wkPtr, (char*)&idcPtr->idcBuffer, recordSize - CHUNK_HEADER_SIZE);
     } else {
       printf("Invalid record number!!! Record number = %d!!!\r\n", idcPtr->idcRecordNumber);
       fclose(fd);
@@ -387,7 +423,41 @@ int getDataByChunk(char **fnl, int cnt) {
     fclose(fd);
   }
 
-  convertBigEndianToLittleEndian((char *)&idData.idChainData, sizeof(idData.idChainData));
-  return (decodeData());
+  convertBigEndianToLittleEndian((char*)&idData.idChainData, sizeof(idData.idChainData));
+  decodeData();
+  saveData(fileName);
+}
 
+int saveData(char* baseName) {
+  FILE* fd;
+  char fileName[1024];
+  time_t tempTime;
+  struct tm* timeInfo;
+  char gpsTime[15];
+
+  gpsTime[0] = 0;
+  strcpy(fileName, baseName);
+  strcat(fileName, "-"); 
+  tempTime = (time_t)idData.idGPSTime;
+  timeInfo = gmtime(&tempTime);
+  strftime(gpsTime, sizeof(gpsTime), "%Y%m%d%H%M%S", timeInfo);
+  strcat(fileName, gpsTime);
+  strcat(fileName, ".dat");
+
+  if ((fd = fopen(fileName, "w")) == NULL) {
+    printf("Error opening input file %s!\r\n", fileName);
+    printf("idecode terminating.\r\n");
+    fclose(fd);
+    exit(1);
+  }
+
+  if (fwrite((char *)&idData, sizeof(idData), 1, fd) != 1) {
+    printf("Error writing output %s!\r\n", fileName);
+    printf("idecode terminating.\r\n");
+    fclose(fd);
+    exit(1);
+  }
+
+  fclose(fd);
+  return (0);
 }
