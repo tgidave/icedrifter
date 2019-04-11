@@ -32,49 +32,40 @@ void convertBigEndianToLittleEndian(char* sPtr, int size);
 float convertTempToC(short temp);
 int saveData(char* baseName);
 
-  int main(int argc, char** argv) {
-//  char *cunkPtr;
-//  char *wkPtr;
-//  int argIx;
-//  int i;
-//  char hb1;
-//  char hb2;
-//  char buffHold;
-//  struct tm *timeInfo;
-//  time_t tempTime;
+int main(int argc, char** argv) {
 
-    if (argc == 1) {
-      printf("\r\nError: No arguments specified!!!\r\n");
-      printf("Help will appear here!!!\r\n");
+  if (argc == 1) {
+    printf("\r\nError: No arguments specified!!!\r\n");
+    printf("Help will appear here!!!\r\n");
+    exit(1);
+  }
+
+  if (argv[1][0] == '-') {
+    switch (argv[1][1]) {
+      case 'c':
+        if (getDataByChunk(&argv[2], argc - 2) != 0) {
+          exit(1);
+        }
+        break;
+      case 'f':
+        if (getDataByFile(&argv[2]) != 0) {
+          exit(1);
+        }
+        break;
+      case 'h':
+        printf("Help will appear here!!!\r\n");
+        exit(0);
+      default:
+        printf("Invalid switch!!!\r\n");
+        printf("Help will appear here!!!\r\n");
+        exit(1);
+    }
+  } else {
+    if (getDataByChar(&argv[1], argc - 1) != 0) {
       exit(1);
     }
-
-    if (argv[1][0] == '-') {
-      switch (argv[1][1]) {
-        case 'c':
-          if (getDataByChunk(&argv[2], argc - 2) != 0) {
-            exit(1);
-          }
-          break;
-        case 'f':
-          if (getDataByFile(&argv[2]) != 0) {
-            exit(1);
-          }
-          break;
-        case 'h':
-          printf("Help will appear here!!!\r\n");
-          exit(0);
-        default:
-          printf("Invalid switch!!!\r\n");
-          printf("Help will appear here!!!\r\n");
-          exit(1);
-      }
-    } else {
-      if (getDataByChar(&argv[1], argc - 1) != 0) {
-        exit(1);
-      }
-    }
   }
+}
 
 int getDataByChar(char** data, int cnt) {
   char* cunkPtr;
@@ -292,7 +283,7 @@ int getDataByFile(char** fnl) {
     exit(1);
   }
 
-  if ((fread((char *)&idData, sizeof(idData), 1, fd) == 0)) {
+  if ((fread((char*)&idData, sizeof(idData), 1, fd) == 0)) {
     printf("Error reading data file %s!\r\n", argIx[0]);
     printf("idecode2 terminating.\r\n");
     fclose(fd);
@@ -437,7 +428,7 @@ int saveData(char* baseName) {
 
   gpsTime[0] = 0;
   strcpy(fileName, baseName);
-  strcat(fileName, "-"); 
+  strcat(fileName, "-");
   tempTime = (time_t)idData.idGPSTime;
   timeInfo = gmtime(&tempTime);
   strftime(gpsTime, sizeof(gpsTime), "%Y%m%d%H%M%S", timeInfo);
@@ -451,7 +442,7 @@ int saveData(char* baseName) {
     exit(1);
   }
 
-  if (fwrite((char *)&idData, sizeof(idData), 1, fd) != 1) {
+  if (fwrite((char*)&idData, sizeof(idData), 1, fd) != 1) {
     printf("Error writing output %s!\r\n", fileName);
     printf("idecode terminating.\r\n");
     fclose(fd);
