@@ -157,9 +157,7 @@ int getDataByChunk(char** fnl, int cnt) {
   zeroRecordFound = false;
 
   // Extract the Rockblock ID number from the file name and make sure
-  // sure all IDs match.  Also check that chunk 0 was received.  If no 
-  // chunk 0 was received, it doesn't make any sense to continue.
-
+  // all IDs match.  
   for (i = 0; i < cnt; ++i) {
 
     strcpy(tempHold, argIx[i]);
@@ -208,6 +206,7 @@ int getDataByChunk(char** fnl, int cnt) {
       exit(1);
     }
 
+    // Get the length of this chunk.
     fseek(fd, 0, SEEK_END);
 
     recordSize = ftell(fd);
@@ -230,12 +229,15 @@ int getDataByChunk(char** fnl, int cnt) {
 
     idcPtr = (iceDrifterChunk*)&fileBuffer;
 
+    // Check that is is really an icedrifter chunk.
     if (!((idcPtr->idcRecordType[0] == 'I') &&
           (idcPtr->idcRecordType[1] == 'D'))) {
       printf("Invalid record! Chunk header - not \"IDxx\"!\r\n");
       exit(1);
     }
 
+    // Pick up the report time from the first chunk processed and check 
+    // that the other chunks have the same report time.
     if (firstTime) {
       recordTime = idcPtr->idcSendTime;
       firstTime = false;
@@ -248,6 +250,7 @@ int getDataByChunk(char** fnl, int cnt) {
       }
     }
 
+    // Copy the chunk data to the proper location within the icedrifterData structure.
     if (idcPtr->idcRecordNumber == 0) {
       wkPtr = (char*)&idData;
       memmove(wkPtr, (char*)&idcPtr->idcBuffer, recordSize - CHUNK_HEADER_SIZE);
@@ -269,12 +272,19 @@ int getDataByChunk(char** fnl, int cnt) {
     fclose(fd);
   }
 
+  // If no Zero record was found it doesn't make sense to continue.
   if (zeroRecordFound == false) {
     printf("Error: No record 0 found.  Can not continue!\r\n");
+    printf("idecode terminating.\r\n"); 
     exit(1);
   }
 
+  // The temperature and light probes return their data in big endien format so
+  // we need to convert that data to little endien.
   convertBigEndianToLittleEndian((char*)&idData.idChainData, sizeof(idData.idChainData));
+
+  // Build the file names that will be used to output the data.  
+  // The file names will be <Rockblock ID>-<report date and time>.
   strcpy(datName, fileName);
   strcat(datName, "-");
   tempTime = (time_t)idData.idGPSTime;
@@ -285,9 +295,14 @@ int getDataByChunk(char** fnl, int cnt) {
   strcpy(txtName, datName);
   strcat(datName, ".dat");
   strcat(txtName, ".txt");
+
+  // Print the icedrifter data in human readable format to the .txt file.
   decodeData(txtName);
+
+  // Save the data to disk.
   saveData(datName);
 
+  // If the user wants to send this data out by email, use mutt to do it.
   if (mailResultsSwitch == true) {
     sprintf(tempHold, "mutt -s \"Data for %s\" -a %s %s -- %s < %s",
             fileName, datName, txtName, emailAddress, txtName);
@@ -300,6 +315,7 @@ int getDataByChunk(char** fnl, int cnt) {
   }
 }
 
+// This function writes the icedrifterData structure to disk.
 void saveData(char* fileName) {
   FILE* fd;
 
