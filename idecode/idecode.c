@@ -316,7 +316,18 @@ int getDataByChunk(char** fnl, int cnt) {
   }
 }
 
+//*****************************************************************************
+//
+// saveData
+// 
+// fileName is the name that will be given the file.
+// 
+// returns nothing.
+// 
 // This function writes the icedrifterData structure to disk.
+//
+//*****************************************************************************
+
 void saveData(char* fileName) {
   FILE* fd;
 
@@ -337,18 +348,30 @@ void saveData(char* fileName) {
   fclose(fd);
 }
 
+//*****************************************************************************
+//
+// getDataByFile
+//
+// fnl is a pointer to the arg list that contains the name of the file to print.
+//
+// Returns 0 for good completion or non-zero for failure.
+//
+// This function opens and reads the file name passed to it and then displays
+// the data contained in the file in human readable format on sysout.
+//
+//*****************************************************************************
+
 int getDataByFile(char** fnl) {
   size_t recordSize;
   int i;
   char** argIx;
-  iceDrifterChunk* idcPtr;
   FILE* fd;
   char* wkPtr;
-  char fileBuffer[MAX_RECORD_LENGTH];
 
   wkPtr = (char*)&idData;
   argIx = fnl;
 
+  // Initialize the icedrifterData structure.
   for (i = 0; i < (BASE_RECORD_LENGTH + TEMP_DATA_SIZE + LIGHT_DATA_SIZE); ++i) {
     *wkPtr - 0;
   }
@@ -368,8 +391,29 @@ int getDataByFile(char** fnl) {
   }
 
   fclose(fd);
+
+  // Write the data in human readable forman to sysout.
+  // Passing a NULL to the decodeData function tells it to write to sysout instead
+  // of a disk file.
   decodeData(NULL);
+  return (0);
 }
+
+//*****************************************************************************
+//
+// getDataByChar
+// 
+// data: A pointer to an arg entry containing the character data to be 
+//       converted into an icedrifterData structure.
+// 
+// cnt:  The number of arg entries to process.
+// 
+// This function takes character data clipped out of the email sent from 
+// Rockblock.  The data is converted to hex data and copied into the structure.
+// The structure is then printed in human readable format.  This feature is
+// not documented in the help listing and is used mainly for testing.
+//      
+//*****************************************************************************
 
 int getDataByChar(char** data, int cnt) {
   char* cunkPtr;
@@ -463,6 +507,18 @@ int getDataByChar(char** data, int cnt) {
   decodeData(NULL);
 }
 
+//*****************************************************************************
+//
+// decodeData
+// 
+// fileName: The file name to write the decoded data in human readable forman.
+//           If fileName is NULL the data will be written to sysour.
+// 
+// The function decodes and prints in human readable format the data contained
+// in the icddrifterData structure.
+//
+//*****************************************************************************
+
 void decodeData(char* fileName) {
 
   struct tm* timeInfo;
@@ -490,6 +546,7 @@ void decodeData(char* fileName) {
   tempTime = (time_t)idData.idLastBootTime;
   timeInfo = gmtime(&tempTime);
   fprintf(fd, "Last Boot:   %s", asctime(timeInfo));
+
   tempTime = (time_t)idData.idGPSTime;
   timeInfo = gmtime(&tempTime);
   fprintf(fd, "GPS time:    %s", asctime(timeInfo));
@@ -552,6 +609,17 @@ void decodeData(char* fileName) {
   }
 }
 
+//*****************************************************************************
+//
+// convertCharToHex
+//
+// chr: a charactor to be converted from charactor formant ot hex format.
+//
+// This function takes a charactor in the range of 0123456789abcdef and 
+// converts it to a byte containing the hex value.
+//
+//*****************************************************************************
+
 char convertCharToHex(char chr) {
   if ((chr >= '0') && (chr <= '9')) {
     return (chr - '0');
@@ -564,6 +632,18 @@ char convertCharToHex(char chr) {
   return (0xFF);
 }
 
+//*****************************************************************************
+//
+// convertBigEndianToLittleEndian
+// 
+// sPtr: A pointer to the beginning of the area to convert.
+// 
+// size: The number of bytes to convert.
+// 
+// This function converts a list of halfwords from big endian to little endian
+// by swapping the two bytes of the halfwords.
+// 
+//*****************************************************************************
 void convertBigEndianToLittleEndian(char* sPtr, int size) {
   char tmp;
   int i;
@@ -575,8 +655,20 @@ void convertBigEndianToLittleEndian(char* sPtr, int size) {
     sPtr += 2;
   }
 }
-
+//*****************************************************************************
+//
+// convertTempToC
+//
+// temp: The sensor temperature to be converted to Celsius.
+//
+// returns: the sensor temperature in Celsius.
+//
+// Converts the sensor temperature data from it's native form to Celsius.
+// 
+//*****************************************************************************
 float convertTempToC(short temp) {
+
+  //This formula is defined in the DSi8B20 sensor datasheet.
   if (temp & 0x8000) {
     return ((float)((temp & 0x7FFF) - 0x8000) / 128.0);
   }
@@ -584,6 +676,8 @@ float convertTempToC(short temp) {
   return ((float)temp / 128.0);
 }
 
+//*****************************************************************************
+//
 // Print out the following help information:
 //
 // Help for idecode2.
@@ -612,6 +706,7 @@ float convertTempToC(short temp) {
 // should be a set of chunks from a single icedrifter report.  The
 // Rockblock id number and sent times should all match.
 //
+//*****************************************************************************
 
 void printHelp(void) {
   printf("Help for idecode2.\r\n\r\n");
