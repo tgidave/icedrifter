@@ -19,10 +19,12 @@ uint32_t ltClear;
 uint8_t rgbRed;
 uint8_t rgbGreen;
 uint8_t rgbBlue;
+bool mailResultsSwitch;
+char emailAddress[256];
 
 //void convertStringToStruct(char* charPtr);
 
-int decodeData(void);
+void decodeData(char* fileName);
 int getDataByFile(char**);
 int getDataByChar(char**, int);
 int getDataByChunk(char**, int);
@@ -30,9 +32,10 @@ int getDataByChunk(char**, int);
 char convertCharToHex(char);
 void convertBigEndianToLittleEndian(char* sPtr, int size);
 float convertTempToC(short temp);
-int saveData(char* baseName);
+void saveData(char* fileName);
 
 int main(int argc, char** argv) {
+  int argIx;
 
   if (argc == 1) {
     printf("\r\nError: No arguments specified!!!\r\n");
@@ -40,25 +43,36 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
-  if (argv[1][0] == '-') {
-    switch (argv[1][1]) {
-      case 'c':
-        if (getDataByChunk(&argv[2], argc - 2) != 0) {
+  argIx = 1;
+  mailResultsSwitch = false;
+
+  if (argv[argIx][0] == '-') {
+    while (1) {
+      switch (argv[argIx][1]) {
+        case 'm':
+          mailResultsSwitch = true;
+          ++argIx;
+          strcpy(emailAddress, argv[argIx]);
+          ++argIx;
+          break;
+        case 'c':
+          if (getDataByChunk(&argv[argIx + 1], argc - argIx - 1) != 0) {
+            exit(1);
+          }
+          return(0);
+        case 'f':
+          if (getDataByFile(&argv[argIx + 1]) != 0) {
+            exit(1);
+          }
+          return(0);
+        case 'h':
+          printf("Help will appear here!!!\r\n");
+          exit(0);
+        default:
+          printf("Invalid switch!!!\r\n");
+          printf("Help will appear here!!!\r\n");
           exit(1);
-        }
-        break;
-      case 'f':
-        if (getDataByFile(&argv[2]) != 0) {
-          exit(1);
-        }
-        break;
-      case 'h':
-        printf("Help will appear here!!!\r\n");
-        exit(0);
-      default:
-        printf("Invalid switch!!!\r\n");
-        printf("Help will appear here!!!\r\n");
-        exit(1);
+      }
     }
   } else {
     if (getDataByChar(&argv[1], argc - 1) != 0) {
@@ -155,60 +169,71 @@ int getDataByChar(char** data, int cnt) {
   }
 
   convertBigEndianToLittleEndian((char*)&idData.idChainData, sizeof(idData.idChainData));
-
-  return (decodeData());
+  decodeData(NULL);
 }
 
-int decodeData() {
+void decodeData(char *fileName) {
 
   struct tm* timeInfo;
   time_t tempTime;
   int i;
+  FILE* fd;
+
+  if (fileName == NULL) {
+    fd = stdout;
+  } else {
+    if ((fd = fopen(fileName, "w")) == NULL) {
+      printf("Error opening input file %s!\r\n", fileName);
+      printf("idecode terminating.\r\n");
+      fclose(fd);
+      exit(1);
+    }
+  }
 
   tempTime = (time_t)idData.idLastBootTime;
   timeInfo = gmtime(&tempTime);
-  printf("Last Boot:   %s", asctime(timeInfo));
+  fprintf(fd, "Last Boot:   %s", asctime(timeInfo));
   tempTime = (time_t)idData.idGPSTime;
   timeInfo = gmtime(&tempTime);
-  printf("GPS time:    %s", asctime(timeInfo));
+  fprintf(fd, "GPS time:    %s", asctime(timeInfo));
 
   if (idData.idcdError == 0) {
-    printf("No errors found.\r\n");
+    fprintf(fd, "No errors found.\r\n");
   } else {
-    printf("\r\nError(s) found!!!\r\n");
+    fprintf(fd, "\r\nError(s) found!!!\r\n");
     if (idData.idcdError & TEMP_CHAIN_TIMEOUT_ERROR) {
-      printf("*** Temperature chain timeout.\r\n");
+      fprintf(fd, "*** Temperature chain timeout.\r\n");
     }
     if (idData.idcdError & TEMP_CHAIN_OVERRUN_ERROR) {
-      printf("*** Temperature chain overrun.\r\n");
+      fprintf(fd, "*** Temperature chain overrun.\r\n");
     }
     if (idData.idcdError & LIGHT_CHAIN_TIMEOUT_ERROR) {
-      printf("*** Light chain timeout.\r\n");
+      fprintf(fd, "*** Light chain timeout.\r\n");
     }
     if (idData.idcdError & LIGHT_CHAIN_OVERRUN_ERROR) {
-      printf("*** Light chain overrun.\r\n");
+      fprintf(fd, "*** Light chain overrun.\r\n");
     }
-    printf("\r\n");
+    fprintf(fd, "\r\n");
   }
 
-  printf("Temp chain bytes received %d\r\n", idData.idTempByteCount);
-  printf("Light chain bytes received %d\r\n\r\n", idData.idLightByteCount);
+  fprintf(fd, "Temp chain bytes received %d\r\n", idData.idTempByteCount);
+  fprintf(fd, "Light chain bytes received %d\r\n\r\n", idData.idLightByteCount);
 
-  printf("latitude:    %f\r\n", idData.idLatitude);
-  printf("longitude:   %f\r\n", idData.idLongitude);
-  printf("temperature: %f C\r\n", idData.idTemperature);
-  printf("pressure:    %f Pa\r\n", idData.idPressure);
+  fprintf(fd, "latitude:    %f\r\n", idData.idLatitude);
+  fprintf(fd, "longitude:   %f\r\n", idData.idLongitude);
+  fprintf(fd, "temperature: %f C\r\n", idData.idTemperature);
+  fprintf(fd, "pressure:    %f Pa\r\n", idData.idPressure);
 
   if (idData.idSwitches & PROCESS_REMOTE_TEMP_SWITCH) {
-    printf("remote temp: %f C\r\n\r\n", idData.idRemoteTemp);
+    fprintf(fd, "remote temp: %f C\r\n\r\n", idData.idRemoteTemp);
   }
 
   if (idData.idSwitches & PROCESS_CHAIN_DATA_SWITCH) {
     for (i = 0; i < TEMP_SENSOR_COUNT; ++i) {
-      printf("Chain temperature sensor %3d = %f\r\n", i, convertTempToC(idData.idChainData.cdTempData[i]));
+      fprintf(fd, "Chain temperature sensor %3d = %f\r\n", i, convertTempToC(idData.idChainData.cdTempData[i]));
     }
 
-    printf("\r\n");
+    fprintf(fd, "\r\n");
 
     for (i = 0; i < LIGHT_SENSOR_COUNT; ++i) {
       if (idData.idChainData.cdLightData[i][0] == 0) {
@@ -220,12 +245,14 @@ int decodeData() {
         rgbBlue = (float)idData.idChainData.cdLightData[i][3] / ltClear * 255.0;
       }
 
-      printf("Chain light sensor %2d = %5hu %5hu %5hu %5hu  RGB %3d %3d %3d\r\n", i,
-             idData.idChainData.cdLightData[i][0], idData.idChainData.cdLightData[i][1], idData.idChainData.cdLightData[i][2], idData.idChainData.cdLightData[i][3],
-             rgbRed, rgbGreen, rgbBlue);
+      fprintf(fd, "Chain light sensor %2d = %5hu %5hu %5hu %5hu  RGB %3d %3d %3d\r\n", i,
+              idData.idChainData.cdLightData[i][0], idData.idChainData.cdLightData[i][1], idData.idChainData.cdLightData[i][2], idData.idChainData.cdLightData[i][3],
+              rgbRed, rgbGreen, rgbBlue);
     }
   }
-  return (0);
+  if (fileName != NULL) {
+    fclose(fd);
+  }
 }
 
 char convertCharToHex(char chr) {
@@ -291,23 +318,29 @@ int getDataByFile(char** fnl) {
   }
 
   fclose(fd);
-  decodeData();
+  decodeData(NULL);
 }
 
 int getDataByChunk(char** fnl, int cnt) {
   char** argIx;
   iceDrifterChunk* idcPtr;
   FILE* fd;
+  char* wkPtr; 
   int recordTime;
   int recordSize;
   int i;
+  time_t tempTime; 
+  struct tm* timeInfo; 
   bool firstTime;
   bool dashFound;
-  char* wkPtr;
-  char fnHold[256];
-  char fileName[256];
+  bool zeroRecordFound;
   char fileBuffer[MAX_RECORD_LENGTH];
-
+  char tempHold[1024];
+  char fileName[1024]; 
+  char datName[1024];
+  char txtName[1024];
+  char gpsTime[15];
+  
   wkPtr = (char*)&idData;
   argIx = fnl;
   firstTime = true;
@@ -318,10 +351,12 @@ int getDataByChunk(char** fnl, int cnt) {
     ++wkPtr;
   }
 
+  zeroRecordFound = false; 
+
   for (i = 0; i < cnt; ++i) {
 
-    strcpy(fnHold, argIx[i]);
-    wkPtr = fnHold;
+    strcpy(tempHold, argIx[i]);
+    wkPtr = tempHold;
     dashFound = false;
 
     while (*wkPtr != 0) {
@@ -329,22 +364,25 @@ int getDataByChunk(char** fnl, int cnt) {
         dashFound = true;
         *wkPtr = 0;
         if (fileName[0] == 0) {
-          strcpy(fileName, fnHold);
+          strcpy(fileName, tempHold);
           printf("Processing data for Rockblock %s.\r\n", fileName);
+          break;
         } else {
-          if (strcmp(fileName, fnHold) != 0) {
+          if (strcmp(fileName, tempHold) != 0) {
             printf("Error: File %d Rockblock name not equal previous file(s)!", i);
             printf("idecode terminating.\r\n");
             exit(1);
           }
+          break;
         }
       }
-      if (dashFound = false) {
-        printf("Error: Invalid Icedrifter file name = %s!", argIx[i]);
-        printf("idecode terminating.\r\n");
-        exit(1);
-      }
       ++wkPtr;
+    }
+
+    if (dashFound = false) {
+      printf("Error: Invalid Icedrifter file name = %s!", argIx[i]);
+      printf("idecode terminating.\r\n");
+      exit(1);
     }
 
     if ((fd = fopen(argIx[i], "r")) == NULL) {
@@ -397,6 +435,7 @@ int getDataByChunk(char** fnl, int cnt) {
     if (idcPtr->idcRecordNumber == 0) {
       wkPtr = (char*)&idData;
       memmove(wkPtr, (char*)&idcPtr->idcBuffer, recordSize - CHUNK_HEADER_SIZE);
+      zeroRecordFound = true;
     } else if (idcPtr->idcRecordNumber == 1) {
       wkPtr = (char*)&idData;
       wkPtr += MAX_CHUNK_DATA_LENGTH;
@@ -414,26 +453,39 @@ int getDataByChunk(char** fnl, int cnt) {
     fclose(fd);
   }
 
+  if (zeroRecordFound == false) {
+    printf("Error: No record 0 found.  Can not continue!\r\n");
+    exit(1);
+  }
+
   convertBigEndianToLittleEndian((char*)&idData.idChainData, sizeof(idData.idChainData));
-  decodeData();
-  saveData(fileName);
-}
-
-int saveData(char* baseName) {
-  FILE* fd;
-  char fileName[1024];
-  time_t tempTime;
-  struct tm* timeInfo;
-  char gpsTime[15];
-
-  gpsTime[0] = 0;
-  strcpy(fileName, baseName);
-  strcat(fileName, "-");
+  strcpy(datName, fileName);
+  strcat(datName, "-");
   tempTime = (time_t)idData.idGPSTime;
   timeInfo = gmtime(&tempTime);
+  gpsTime[0] = 0; 
   strftime(gpsTime, sizeof(gpsTime), "%Y%m%d%H%M%S", timeInfo);
-  strcat(fileName, gpsTime);
-  strcat(fileName, ".dat");
+  strcat(datName, gpsTime);
+  strcpy(txtName, datName);
+  strcat(datName, ".dat");
+  strcat(txtName, ".txt");
+  decodeData(txtName);
+  saveData(datName);
+
+  if (mailResultsSwitch == true) {
+    sprintf(tempHold, "mutt -s \"Data for %s\" -a %s %s -- %s < %s", 
+            fileName, datName, txtName, emailAddress, txtName);
+
+    if (system(tempHold) != 0) {
+      printf("Error returned from mutt command!!!\r\n");
+      printf("idecode terminating.\r\n");
+      exit(1);
+    }
+  }
+}
+
+void saveData(char* fileName) {
+  FILE* fd;
 
   if ((fd = fopen(fileName, "w")) == NULL) {
     printf("Error opening input file %s!\r\n", fileName);
@@ -450,5 +502,4 @@ int saveData(char* baseName) {
   }
 
   fclose(fd);
-  return (0);
 }
