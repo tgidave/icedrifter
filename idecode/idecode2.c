@@ -28,18 +28,18 @@ void decodeData(char* fileName);
 int getDataByFile(char**);
 int getDataByChar(char**, int);
 int getDataByChunk(char**, int);
-//int getDataInDirectory(char *);
 char convertCharToHex(char);
 void convertBigEndianToLittleEndian(char* sPtr, int size);
 float convertTempToC(short temp);
 void saveData(char* fileName);
+void printHelp(void);
 
 int main(int argc, char** argv) {
   int argIx;
 
   if (argc == 1) {
-    printf("\r\nError: No arguments specified!!!\r\n");
-    printf("Help will appear here!!!\r\n");
+    printf("\r\nError: No arguments specified!!!\r\n\r\n");
+    printHelp();
     exit(1);
   }
 
@@ -59,18 +59,18 @@ int main(int argc, char** argv) {
           if (getDataByChunk(&argv[argIx + 1], argc - argIx - 1) != 0) {
             exit(1);
           }
-          return(0);
+          return (0);
         case 'f':
           if (getDataByFile(&argv[argIx + 1]) != 0) {
             exit(1);
           }
-          return(0);
+          return (0);
         case 'h':
-          printf("Help will appear here!!!\r\n");
+          printHelp();
           exit(0);
         default:
-          printf("Invalid switch!!!\r\n");
-          printf("Help will appear here!!!\r\n");
+          printf("Invalid switch!!!\r\n\r\n");
+          printHelp();
           exit(1);
       }
     }
@@ -172,7 +172,7 @@ int getDataByChar(char** data, int cnt) {
   decodeData(NULL);
 }
 
-void decodeData(char *fileName) {
+void decodeData(char* fileName) {
 
   struct tm* timeInfo;
   time_t tempTime;
@@ -325,22 +325,22 @@ int getDataByChunk(char** fnl, int cnt) {
   char** argIx;
   iceDrifterChunk* idcPtr;
   FILE* fd;
-  char* wkPtr; 
+  char* wkPtr;
   int recordTime;
   int recordSize;
   int i;
-  time_t tempTime; 
-  struct tm* timeInfo; 
+  time_t tempTime;
+  struct tm* timeInfo;
   bool firstTime;
   bool dashFound;
   bool zeroRecordFound;
   char fileBuffer[MAX_RECORD_LENGTH];
   char tempHold[1024];
-  char fileName[1024]; 
+  char fileName[1024];
   char datName[1024];
   char txtName[1024];
   char gpsTime[15];
-  
+
   wkPtr = (char*)&idData;
   argIx = fnl;
   firstTime = true;
@@ -351,7 +351,7 @@ int getDataByChunk(char** fnl, int cnt) {
     ++wkPtr;
   }
 
-  zeroRecordFound = false; 
+  zeroRecordFound = false;
 
   for (i = 0; i < cnt; ++i) {
 
@@ -463,7 +463,7 @@ int getDataByChunk(char** fnl, int cnt) {
   strcat(datName, "-");
   tempTime = (time_t)idData.idGPSTime;
   timeInfo = gmtime(&tempTime);
-  gpsTime[0] = 0; 
+  gpsTime[0] = 0;
   strftime(gpsTime, sizeof(gpsTime), "%Y%m%d%H%M%S", timeInfo);
   strcat(datName, gpsTime);
   strcpy(txtName, datName);
@@ -473,7 +473,7 @@ int getDataByChunk(char** fnl, int cnt) {
   saveData(datName);
 
   if (mailResultsSwitch == true) {
-    sprintf(tempHold, "mutt -s \"Data for %s\" -a %s %s -- %s < %s", 
+    sprintf(tempHold, "mutt -s \"Data for %s\" -a %s %s -- %s < %s",
             fileName, datName, txtName, emailAddress, txtName);
 
     if (system(tempHold) != 0) {
@@ -502,4 +502,56 @@ void saveData(char* fileName) {
   }
 
   fclose(fd);
+}
+
+// Print out the following help information:
+//
+// Help for idecode2.
+//
+// idecode2 [-m <email address>] -c <file name list or *.bin>
+// idecode2 -f <path and file name of a .dat file>
+// idecode2 <character data from email(s) as a single string>
+//
+// -c Read one to three .bin chunk files, decode the data, display
+//    human readable data on the console, write the human
+//    readable data to a file with the file name of
+//    <Rockblock id>-<yyyymmddhhmmss>.txt, and write the accumulated data
+//    as an icedrifterData structured file with a file name of
+//    <Rockblock id>-<yyyymmddhhmmss>.dat.  The file names should
+//    not contain a path.
+//
+// -f Read in the specified file expecting it to be a .dat type
+//    icedrifterData structured file and print it's data in a human
+//    readable format to the console.
+//
+// -m Only used with -c.  Must be specified before the -c option.
+//    Indicates that an email should be created and sent to <email address>
+//    which contains the console output and attached .dat and .txt files.
+//
+// For the -c option, if more than one file is specified, these files
+// should be a set of chunks from a single icedrifter report.  The
+// Rockblock id number and sent times should all match.
+//
+
+void printHelp(void) {
+  printf("Help for idecode2.\r\n\r\n");
+  printf("idecode2 [-m <email address>] -c <file name list or *.bin>\r\n");
+  printf("idecode2 -f <path and file name of a .dat file>\r\n");
+  printf("idecode2 <character data from email(s) as a single string>\r\n\r\n");
+  printf("-c Read one to three .bin chunk files, decode the data, display\r\n");
+  printf("   human readable data on the console, write the human\r\n");
+  printf("   readable data to a file with the file name of\r\n");
+  printf("   <Rockblock id>-<yyyymmddhhmmss>.txt, and write the accumulated data\r\n");
+  printf("   as an icedrifterData structured file with a file name of\r\n");
+  printf("   <Rockblock id>-<yyyymmddhhmmss>.dat.  The file names should\r\n");
+  printf("   not contain a path.\r\n\r\n");
+  printf("-f Read in the specified file expecting it to be a .dat type\r\n");
+  printf("   icedrifterData structured file and print it's data in a human\r\n");
+  printf("   readable format to the console.\r\n\r\n");
+  printf("-m Only used with -c.  Must be specified before the -c option.\r\n");
+  printf("   Indicates that an email should be created and sent to <email address>\r\n");
+  printf("   which contains the console output and attached .dat and .txt files.\r\n\r\n");
+  printf("For the -c option, if more than one file is specified, these files\r\n");
+  printf("should be a set of chunks from a single icedrifter report.  The\r\n");
+  printf("Rockblock id number and sent times should all match.\r\n");
 }
