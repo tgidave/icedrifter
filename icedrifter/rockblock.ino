@@ -17,7 +17,7 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
 #ifdef NEVER_TRANSMIT
 
 #ifdef SERIAL_DEBUG_ROCKBLOCK
-  DEBUG_SERIAL.print(F("Transmission disabled by NEVER_TRANSMIT switch.\r\n"));
+  DEBUG_SERIAL.print(F("Transmission disabled by NEVER_TRANSMIT switch.\n"));
 #endif
 
 #else // NEVER_TRANSMIT
@@ -40,7 +40,7 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
 
 #ifdef SERIAL_DEBUG_ROCKBLOCK
   DEBUG_SERIAL.flush();
-  DEBUG_SERIAL.println(F("Powering up RockBLOCK\r\n"));
+  DEBUG_SERIAL.println(F("Powering up RockBLOCK\n"));
   DEBUG_SERIAL.flush();
 #endif // SERIAL_DEBUG_ROCKBLOCK
 
@@ -50,7 +50,7 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
   // Step 3: Start talking to the RockBLOCK and power it up
 #ifdef SERIAL_DEBUG_ROCKBLOCK
   DEBUG_SERIAL.flush();
-  DEBUG_SERIAL.println(F("RockBLOCK begin\r\n"));
+  DEBUG_SERIAL.println(F("RockBLOCK begin\n"));
   DEBUG_SERIAL.flush();
 #endif // SERIAL_DEBUG_ROCKBLOCK
   rbSerial.listen();
@@ -62,7 +62,7 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
     DEBUG_SERIAL.print((long)idPtr, HEX);
     DEBUG_SERIAL.print(F(" length="));
     DEBUG_SERIAL.print(idLen);
-    DEBUG_SERIAL.print(F("\r\n"));
+    DEBUG_SERIAL.print(F("\n"));
     DEBUG_SERIAL.flush();
 #endif // SERIAL_DEBUG_ROCKBLOCK
 
@@ -95,7 +95,7 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
       DEBUG_SERIAL.print((long)chunkPtr, HEX);
       DEBUG_SERIAL.print(F(" Chunk length="));
       DEBUG_SERIAL.print(chunkLen);
-      DEBUG_SERIAL.print(F("\r\n"));
+      DEBUG_SERIAL.print(F("\n"));
       wkPtr = (uint8_t *)&idcChunk;
 
       for (i = 0; i < chunkLen; i++) {
@@ -103,7 +103,7 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
         ++wkPtr;
       }
 
-      DEBUG_SERIAL.print(F("\r\n"));
+      DEBUG_SERIAL.print(F("\n"));
       DEBUG_SERIAL.flush();
 #endif // SERIAL_DEBUG_ROCKBLOCK
 
@@ -112,12 +112,12 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
 #ifdef SERIAL_DEBUG_ROCKBLOCK
       DEBUG_SERIAL.flush();
       if (rc == 0) {
-        DEBUG_SERIAL.print(F("Good return code from send!\r\n"));
+        DEBUG_SERIAL.print(F("Good return code from send!\n"));
         DEBUG_SERIAL.flush();
       } else {
         DEBUG_SERIAL.print(F("Bad return code from send = "));
         DEBUG_SERIAL.print(rc);
-        DEBUG_SERIAL.print(F("\r\n"));
+        DEBUG_SERIAL.print(F("\n"));
         DEBUG_SERIAL.flush();
       }
 #endif // SERIAL_DEBUG_ROCKBLOCK
@@ -127,7 +127,7 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
   } else {
     DEBUG_SERIAL.print("Bad return code from begin = ");
     DEBUG_SERIAL.print(rc);
-    DEBUG_SERIAL.print("\r\n");
+    DEBUG_SERIAL.print("\n");
     DEBUG_SERIAL.flush();
 #endif // SERIAL_DEBUG_ROCKBLOCK
   }

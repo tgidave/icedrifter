@@ -58,7 +58,7 @@ int gpsGetFix(fixType typeFix, icedrifterData * idData) {
 #ifdef SERIAL_DEBUG_GPS
     *outBuffer = 0;
     PString str(outBuffer, OUTBUFFER_SIZE);
-    str.print(F("fix found!\r\n"));
+    str.print(F("fix found!\n"));
     str.print(tinygps.date.year());
     str.print(F("/"));
     str.print(tinygps.date.month());
@@ -86,7 +86,7 @@ int gpsGetFix(fixType typeFix, icedrifterData * idData) {
     }
 
 #ifdef SERIAL_DEBUG_GPS
-    str.print(F("\r\n"));
+    str.print(F("\n"));
 
     DEBUG_SERIAL.print(outBuffer);
 #endif
@@ -95,7 +95,7 @@ int gpsGetFix(fixType typeFix, icedrifterData * idData) {
 
 #ifdef SERIAL_DEBUG_GPS
 else {
-    DEBUG_SERIAL.print(F("No fix found.\r\n"));
+    DEBUG_SERIAL.print(F("No fix found.\n"));
   }
 #endif
 

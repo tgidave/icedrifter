@@ -33,7 +33,7 @@ void processChainData(icedrifterData* idPtr) {
   uint8_t rgbBlue;
 
 #ifdef SERIAL_DEBUG
-  DEBUG_SERIAL.print(F("\r\nPowering up chain.\r\n"));
+  DEBUG_SERIAL.print(F("\nPowering up chain.\n"));
 #endif // SERIAL_DEBUG
 
   digitalWrite(CHAIN_POWER_PIN, HIGH);
@@ -78,14 +78,14 @@ void processChainData(icedrifterData* idPtr) {
 #ifdef SERIAL_DEBUG
   DEBUG_SERIAL.print(F("Received "));
   DEBUG_SERIAL.print(idPtr->idTempByteCount);
-  DEBUG_SERIAL.print(F(" bytes of temp chain data.\r\n"));
+  DEBUG_SERIAL.print(F(" bytes of temp chain data.\n"));
 
   if (idPtr->idcdError & TEMP_CHAIN_TIMEOUT_ERROR) {
-    DEBUG_SERIAL.print(F("\r\nTimeout on temp chain!!!\r\n"));
+    DEBUG_SERIAL.print(F("\nTimeout on temp chain!!!\n"));
     DEBUG_SERIAL.print((TEMP_DATA_SIZE));
     DEBUG_SERIAL.print(F(" bytes requested but only "));
     DEBUG_SERIAL.print(idPtr->idTempByteCount);
-    DEBUG_SERIAL.print(F(" bytes received\r\n"));
+    DEBUG_SERIAL.print(F(" bytes received\n"));
   }
 #endif // SERIAL_DEBUG
 
@@ -93,10 +93,10 @@ void processChainData(icedrifterData* idPtr) {
     idPtr->idcdError |= TEMP_CHAIN_OVERRUN_ERROR;
 
 #ifdef SERIAL_DEBUG
-    DEBUG_SERIAL.print(F("\r\nToo much chain data received!!!\r\n"));
-    DEBUG_SERIAL.print(F("\r\nReturning with chainError = "));
+    DEBUG_SERIAL.print(F("\nToo much chain data received!!!\n"));
+    DEBUG_SERIAL.print(F("\nReturning with chainError = "));
     DEBUG_SERIAL.print(idPtr->idcdError);
-    DEBUG_SERIAL.print(F("\r\n"));
+    DEBUG_SERIAL.print(F("\n"));
 #endif // SERIAL_DEBUG
 
     schain.flush();
@@ -133,28 +133,28 @@ void processChainData(icedrifterData* idPtr) {
 #ifdef SERIAL_DEBUG
   DEBUG_SERIAL.print(F("Received "));
   DEBUG_SERIAL.print(idPtr->idLightByteCount);
-  DEBUG_SERIAL.print(F(" bytes of light data.\r\n"));
+  DEBUG_SERIAL.print(F(" bytes of light data.\n"));
 
   if (chainError != 0) {
-    DEBUG_SERIAL.print(F("\r\nTimeout on light chain!!!\r\n"));
+    DEBUG_SERIAL.print(F("\nTimeout on light chain!!!\n"));
     DEBUG_SERIAL.print(LIGHT_DATA_SIZE);
     DEBUG_SERIAL.print(F(" bytes requested but only "));
     DEBUG_SERIAL.print(idPtr->idLightByteCount);
-    DEBUG_SERIAL.print(F(" bytes received\r\n"));
+    DEBUG_SERIAL.print(F(" bytes received\n"));
   }
 #endif // SERIAL_DEBUG
 
   if (schain.available()) {
     idPtr->idcdError |= LIGHT_CHAIN_OVERRUN_ERROR;
 #ifdef SERIAL_DEBUG
-    DEBUG_SERIAL.print(F("\r\nToo much light data received!!!\r\n"));
+    DEBUG_SERIAL.print(F("\nToo much light data received!!!\n"));
 #endif // SERIAL_DEBUG
   }
 
 #ifdef SERIAL_DEBUG
-  DEBUG_SERIAL.print(F("\r\nReturning with idData.idcdError = "));
+  DEBUG_SERIAL.print(F("\nReturning with idData.idcdError = "));
   DEBUG_SERIAL.print(idPtr->idcdError);
-  DEBUG_SERIAL.print(F("\r\n"));
+  DEBUG_SERIAL.print(F("\n"));
 #endif // SERIAL_DEBUG
 
   schain.flush();

@@ -24,9 +24,9 @@ void getBMP280Data(icedrifterData* idData) {
 
 #ifdef SERIAL_DEBUG_BMP280
   if (deviceReady) {
-    DEBUG_SERIAL.print(F("BMP280 ready.\r\n"));
+    DEBUG_SERIAL.print(F("BMP280 ready.\n"));
   } else {
-    DEBUG_SERIAL.print(F("BMP280 did not become ready!!!\r\n"));
+    DEBUG_SERIAL.print(F("BMP280 did not become ready!!!\n"));
   }
 #endif
 
@@ -47,13 +47,13 @@ void getBMP280Data(icedrifterData* idData) {
     DEBUG_SERIAL.print(idData->idTemperature);
     DEBUG_SERIAL.print(F(" pressure = "));
     DEBUG_SERIAL.print(idData->idPressure);
-    DEBUG_SERIAL.print(F(" Pa\r\n"));
+    DEBUG_SERIAL.print(F(" Pa\n"));
 #endif
 
   } else {
 
 #ifdef SERIAL_DEBUG_BMP280
-    DEBUG_SERIAL.print(F("BMP280 did not become ready!!!\r\n"));
+    DEBUG_SERIAL.print(F("BMP280 did not become ready!!!\n"));
 #endif
 
     idData->idTemperature = 0;

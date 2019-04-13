@@ -21,8 +21,7 @@
 #include "../icedrifter/icedrifter.h"
 #include "../icedrifter/rockblock.h"
 
-// structure that defines the icedrifter record.
-icedrifterData idData;
+icedrifterData idData; // structure that defines the icedrifter record.
 
 #define BUFF_SIZE 2048  // size of the buffer used to decode character data.        
 #define FILE_NAME_SIZE  1024  // size of buffers used for file names.
@@ -53,7 +52,7 @@ int main(int argc, char** argv) {
 
 // we are expecting at least one argument.
   if (argc == 1) {
-    printf("\r\nError: No arguments specified!!!\r\n\r\n");
+    printf("\nError: No arguments specified!!!\n\n");
     printHelp();
     exit(1);
   }
@@ -75,7 +74,7 @@ int main(int argc, char** argv) {
           if (getDataByChunk(&argv[argIx + 1], argc - argIx - 1) != 0) {
             exit(1);
           }
-          printf("Decode sucessful.\r\n");
+          printf("Decode sucessful.\n");
           return (0);
         case 'f':
           if (getDataByFile(&argv[argIx + 1]) != 0) {
@@ -86,7 +85,7 @@ int main(int argc, char** argv) {
           printHelp();
           exit(0);
         default:
-          printf("Invalid switch!!!\r\n\r\n");
+          printf("Invalid switch!!!\n\n");
           printHelp();
           exit(1);
       }
@@ -176,13 +175,13 @@ int getDataByChunk(char** fnl, int cnt) {
           *wkPtr = 0;
           if (fileName[0] == 0) {
             strcpy(fileName, fnPtr);
-            printf("Processing data for Rockblock %s.\r\n", fileName);
+            printf("Processing data for Rockblock %s.\n", fileName);
             break;
           } else {
             // If the Rockblock ID's don't match we can not continue. 
             if (strcmp(fileName, fnPtr) != 0) {
               printf("Error: File %d Rockblock name not equal previous file(s)!", i);
-              printf("idecode terminating.\r\n");
+              printf("idecode terminating.\n");
               exit(1);
             }
             break;
@@ -196,13 +195,13 @@ int getDataByChunk(char** fnl, int cnt) {
     // so we quit.
     if (dashFound = false) {
       printf("Error: Invalid Icedrifter file name = %s!", argIx[i]);
-      printf("idecode terminating.\r\n");
+      printf("idecode terminating.\n");
       exit(1);
     }
 
     if ((fd = fopen(argIx[i], "r")) == NULL) {
-      printf("Error opening input file %s!\r\n", argIx[0]);
-      printf("idecode terminating.\r\n");
+      printf("Error opening input file %s!\n", argIx[0]);
+      printf("idecode terminating.\n");
       fclose(fd);
       exit(1);
     }
@@ -213,8 +212,8 @@ int getDataByChunk(char** fnl, int cnt) {
     recordSize = ftell(fd);
 
     if ((recordSize == 0) || (recordSize > MAX_CHUNK_LENGTH)) {
-      printf("Error: Record size zero or too long = %d!!!\r\n", recordSize);
-      printf("idecode terminating.\r\n");
+      printf("Error: Record size zero or too long = %d!!!\n", recordSize);
+      printf("idecode terminating.\n");
       fclose(fd);
       exit(1);
     }
@@ -222,8 +221,8 @@ int getDataByChunk(char** fnl, int cnt) {
     fseek(fd, 0, SEEK_SET);
 
     if (fread(fileBuffer, recordSize, 1, fd) == 0) {
-      printf("Error reading data file!\r\n");
-      printf("idecode terminating.\r\n");
+      printf("Error reading data file!\n");
+      printf("idecode terminating.\n");
       fclose(fd);
       exit(1);
     }
@@ -233,7 +232,7 @@ int getDataByChunk(char** fnl, int cnt) {
     // Check that is is really an icedrifter chunk.
     if (!((idcPtr->idcRecordType[0] == 'I') &&
           (idcPtr->idcRecordType[1] == 'D'))) {
-      printf("Invalid record! Chunk header - not \"IDxx\"!\r\n");
+      printf("Invalid record! Chunk header - not \"IDxx\"!\n");
       exit(1);
     }
 
@@ -244,8 +243,8 @@ int getDataByChunk(char** fnl, int cnt) {
       firstTime = false;
     } else {
       if (idcPtr->idcSendTime != recordTime) {
-        printf("Error: Sent time of record %d does not equal sent time of first record!\r\n", i + 1);
-        printf("idecode terminating.\r\n");
+        printf("Error: Sent time of record %d does not equal sent time of first record!\n", i + 1);
+        printf("idecode terminating.\n");
         fclose(fd);
         exit(1);
       }
@@ -265,7 +264,7 @@ int getDataByChunk(char** fnl, int cnt) {
       wkPtr += (MAX_CHUNK_DATA_LENGTH * 2);
       memmove(wkPtr, (char*)&idcPtr->idcBuffer, recordSize - CHUNK_HEADER_SIZE);
     } else {
-      printf("Invalid record number!!! Record number = %d!!!\r\n", idcPtr->idcRecordNumber);
+      printf("Invalid record number!!! Record number = %d!!!\n", idcPtr->idcRecordNumber);
       fclose(fd);
       exit(1);
     }
@@ -275,8 +274,8 @@ int getDataByChunk(char** fnl, int cnt) {
 
   // If no Zero record was found it doesn't make sense to continue.
   if (zeroRecordFound == false) {
-    printf("Error: No record 0 found.  Can not continue!\r\n");
-    printf("idecode terminating.\r\n"); 
+    printf("Error: No record 0 found.  Can not continue!\n");
+    printf("idecode terminating.\n"); 
     exit(1);
   }
 
@@ -309,8 +308,8 @@ int getDataByChunk(char** fnl, int cnt) {
             fileName, datName, txtName, emailAddress, txtName);
 
     if (system(tempHold) != 0) {
-      printf("Error returned from mutt command!!!\r\n");
-      printf("idecode terminating.\r\n");
+      printf("Error returned from mutt command!!!\n");
+      printf("idecode terminating.\n");
       exit(1);
     }
   }
@@ -332,15 +331,15 @@ void saveData(char* fileName) {
   FILE* fd;
 
   if ((fd = fopen(fileName, "w")) == NULL) {
-    printf("Error opening input file %s!\r\n", fileName);
-    printf("idecode terminating.\r\n");
+    printf("Error opening input file %s!\n", fileName);
+    printf("idecode terminating.\n");
     fclose(fd);
     exit(1);
   }
 
   if (fwrite((char*)&idData, sizeof(idData), 1, fd) != 1) {
-    printf("Error writing output %s!\r\n", fileName);
-    printf("idecode terminating.\r\n");
+    printf("Error writing output %s!\n", fileName);
+    printf("idecode terminating.\n");
     fclose(fd);
     exit(1);
   }
@@ -377,15 +376,15 @@ int getDataByFile(char** fnl) {
   }
 
   if ((fd = fopen(argIx[0], "r")) == NULL) {
-    printf("Error opening input file %s!\r\n", argIx[0]);
-    printf("idecode terminating.\r\n");
+    printf("Error opening input file %s!\n", argIx[0]);
+    printf("idecode terminating.\n");
     fclose(fd);
     exit(1);
   }
 
   if ((fread((char*)&idData, sizeof(idData), 1, fd) == 0)) {
-    printf("Error reading data file %s!\r\n", argIx[0]);
-    printf("idecode2 terminating.\r\n");
+    printf("Error reading data file %s!\n", argIx[0]);
+    printf("idecode2 terminating.\n");
     fclose(fd);
     exit(1);
   }
@@ -452,7 +451,7 @@ int getDataByChar(char** data, int cnt) {
             (data[recNum][dataIx] == '\r') ||
             (data[recNum][dataIx] == '\n'))) {
         if ((hb1 = convertCharToHex(data[recNum][dataIx])) == 0xFF) {
-          printf("\r\nInvalid hex charactor found at location %d!!!\r\n", dataIx);
+          printf("\nInvalid hex charactor found at location %d!!!\n", dataIx);
           exit(1);
         }
       } else {
@@ -463,7 +462,7 @@ int getDataByChar(char** data, int cnt) {
             (data[recNum][dataIx + 1] == '\r') ||
             (data[recNum][dataIx + 1] == '\n'))) {
         if ((hb2 = convertCharToHex(data[recNum][dataIx + 1])) == 0xFF) {
-          printf("\r\nInvalid hex charactor found at location %d!!!\r\n", (i + 1));
+          printf("\nInvalid hex charactor found at location %d!!!\n", (i + 1));
           exit(1);
         }
       }
@@ -477,7 +476,7 @@ int getDataByChar(char** data, int cnt) {
     idcPtr = (iceDrifterChunk*)buff;
 
     if (!((idcPtr->idcRecordType[0] == 'I') && (idcPtr->idcRecordType[1] == 'D'))) {
-      printf("Record ID not = \"ID\"!!!\r\n");
+      printf("Record ID not = \"ID\"!!!\n");
       exit(1);
     }
 
@@ -536,8 +535,8 @@ void decodeData(char* fileName) {
     fd = stdout;
   } else {
     if ((fd = fopen(fileName, "w")) == NULL) {
-      printf("Error opening input file %s!\r\n", fileName);
-      printf("idecode terminating.\r\n");
+      printf("Error opening input file %s!\n", fileName);
+      printf("idecode terminating.\n");
       fclose(fd);
       exit(1);
     }
@@ -552,42 +551,42 @@ void decodeData(char* fileName) {
   fprintf(fd, "GPS time:    %s", asctime(timeInfo));
 
   if (idData.idcdError == 0) {
-    fprintf(fd, "No errors found.\r\n");
+    fprintf(fd, "No errors found.\n");
   } else {
-    fprintf(fd, "\r\nError(s) found!!!\r\n");
+    fprintf(fd, "\nError(s) found!!!\n");
     if (idData.idcdError & TEMP_CHAIN_TIMEOUT_ERROR) {
-      fprintf(fd, "*** Temperature chain timeout.\r\n");
+      fprintf(fd, "*** Temperature chain timeout.\n");
     }
     if (idData.idcdError & TEMP_CHAIN_OVERRUN_ERROR) {
-      fprintf(fd, "*** Temperature chain overrun.\r\n");
+      fprintf(fd, "*** Temperature chain overrun.\n");
     }
     if (idData.idcdError & LIGHT_CHAIN_TIMEOUT_ERROR) {
-      fprintf(fd, "*** Light chain timeout.\r\n");
+      fprintf(fd, "*** Light chain timeout.\n");
     }
     if (idData.idcdError & LIGHT_CHAIN_OVERRUN_ERROR) {
-      fprintf(fd, "*** Light chain overrun.\r\n");
+      fprintf(fd, "*** Light chain overrun.\n");
     }
-    fprintf(fd, "\r\n");
+    fprintf(fd, "\n");
   }
 
-  fprintf(fd, "Temp chain bytes received %d\r\n", idData.idTempByteCount);
-  fprintf(fd, "Light chain bytes received %d\r\n\r\n", idData.idLightByteCount);
+  fprintf(fd, "Temp chain bytes received %d\n", idData.idTempByteCount);
+  fprintf(fd, "Light chain bytes received %d\n\n", idData.idLightByteCount);
 
-  fprintf(fd, "latitude:    %f\r\n", idData.idLatitude);
-  fprintf(fd, "longitude:   %f\r\n", idData.idLongitude);
-  fprintf(fd, "temperature: %f C\r\n", idData.idTemperature);
-  fprintf(fd, "pressure:    %f Pa\r\n", idData.idPressure);
+  fprintf(fd, "latitude:    %f\n", idData.idLatitude);
+  fprintf(fd, "longitude:   %f\n", idData.idLongitude);
+  fprintf(fd, "temperature: %f C\n", idData.idTemperature);
+  fprintf(fd, "pressure:    %f Pa\n", idData.idPressure);
 
   if (idData.idSwitches & PROCESS_REMOTE_TEMP_SWITCH) {
-    fprintf(fd, "remote temp: %f C\r\n\r\n", idData.idRemoteTemp);
+    fprintf(fd, "remote temp: %f C\n\n", idData.idRemoteTemp);
   }
 
   if (idData.idSwitches & PROCESS_CHAIN_DATA_SWITCH) {
     for (i = 0; i < TEMP_SENSOR_COUNT; ++i) {
-      fprintf(fd, "Chain temperature sensor %3d = %f\r\n", i, convertTempToC(idData.idChainData.cdTempData[i]));
+      fprintf(fd, "Chain temperature sensor %3d = %f\n", i, convertTempToC(idData.idChainData.cdTempData[i]));
     }
 
-    fprintf(fd, "\r\n");
+    fprintf(fd, "\n");
 
     for (i = 0; i < LIGHT_SENSOR_COUNT; ++i) {
       if (idData.idChainData.cdLightData[i][0] == 0) {
@@ -599,7 +598,7 @@ void decodeData(char* fileName) {
         rgbBlue = (float)idData.idChainData.cdLightData[i][3] / ltClear * 255.0;
       }
 
-      fprintf(fd, "Chain light sensor %2d = %5hu %5hu %5hu %5hu  RGB %3d %3d %3d\r\n", i,
+      fprintf(fd, "Chain light sensor %2d = %5hu %5hu %5hu %5hu  RGB %3d %3d %3d\n", i,
               idData.idChainData.cdLightData[i][0], idData.idChainData.cdLightData[i][1], idData.idChainData.cdLightData[i][2], idData.idChainData.cdLightData[i][3],
               rgbRed, rgbGreen, rgbBlue);
     }
@@ -709,24 +708,24 @@ float convertTempToC(short temp) {
 //*****************************************************************************
 
 void printHelp(void) {
-  printf("Help for idecode2.\r\n\r\n");
-  printf("idecode2 [-m <email address>] -c <file name list or *.bin>\r\n");
-  printf("idecode2 -f <path and file name of a .dat file>\r\n");
-  printf("idecode2 <character data from email(s) as a single string>\r\n\r\n");
-  printf("-c Read one to three .bin chunk files, decode the data, display\r\n");
-  printf("   human readable data on the console, write the human\r\n");
-  printf("   readable data to a file with the file name of\r\n");
-  printf("   <Rockblock id>-<yyyymmddhhmmss>.txt, and write the accumulated data\r\n");
-  printf("   as an icedrifterData structured file with a file name of\r\n");
-  printf("   <Rockblock id>-<yyyymmddhhmmss>.dat.  The file names should\r\n");
-  printf("   not contain a path.\r\n\r\n");
-  printf("-f Read in the specified file expecting it to be a .dat type\r\n");
-  printf("   icedrifterData structured file and print it's data in a human\r\n");
-  printf("   readable format to the console.\r\n\r\n");
-  printf("-m Only used with -c.  Must be specified before the -c option.\r\n");
-  printf("   Indicates that an email should be created and sent to <email address>\r\n");
-  printf("   which contains the console output and attached .dat and .txt files.\r\n\r\n");
-  printf("For the -c option, if more than one file is specified, these files\r\n");
-  printf("should be a set of chunks from a single icedrifter report.  The\r\n");
-  printf("Rockblock id number and sent times should all match.\r\n");
+  printf("Help for idecode2.\n\n");
+  printf("idecode2 [-m <email address>] -c <file name list or *.bin>\n");
+  printf("idecode2 -f <path and file name of a .dat file>\n");
+  printf("idecode2 <character data from email(s) as a single string>\n\n");
+  printf("-c Read one to three .bin chunk files, decode the data, display\n");
+  printf("   human readable data on the console, write the human\n");
+  printf("   readable data to a file with the file name of\n");
+  printf("   <Rockblock id>-<yyyymmddhhmmss>.txt, and write the accumulated data\n");
+  printf("   as an icedrifterData structured file with a file name of\n");
+  printf("   <Rockblock id>-<yyyymmddhhmmss>.dat.  The file names should\n");
+  printf("   not contain a path.\n\n");
+  printf("-f Read in the specified file expecting it to be a .dat type\n");
+  printf("   icedrifterData structured file and print it's data in a human\n");
+  printf("   readable format to the console.\n\n");
+  printf("-m Only used with -c.  Must be specified before the -c option.\n");
+  printf("   Indicates that an email should be created and sent to <email address>\n");
+  printf("   which contains the console output and attached .dat and .txt files.\n\n");
+  printf("For the -c option, if more than one file is specified, these files\n");
+  printf("should be a set of chunks from a single icedrifter report.  The\n");
+  printf("Rockblock id number and sent times should all match.\n");
 }

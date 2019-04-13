@@ -201,19 +201,19 @@ void accumulateAndSendData(void) {
   wkPtr = (uint8_t*)&idData;
 
 #ifdef SERIAL_DEBUG
-  DEBUG_SERIAL.print(F("Dumping data record\r\n"));
+  DEBUG_SERIAL.print(F("Dumping data record\n"));
   DEBUG_SERIAL.print(F("Address = "));
   DEBUG_SERIAL.print((uint32_t)wkPtr, HEX);
   DEBUG_SERIAL.print(F(" size = "));
   DEBUG_SERIAL.print(totalDataLength);
-  DEBUG_SERIAL.print(F("\r\n"));
+  DEBUG_SERIAL.print(F("\n"));
 
   for (i = 0; i < totalDataLength; i++) {
     printHexChar((uint8_t)*wkPtr);
     ++wkPtr;
   }
 
-  DEBUG_SERIAL.print(F("\r\n"));
+  DEBUG_SERIAL.print(F("\n"));
 #endif // SERIAL_DEBUG
 
   rbTransmitIcedrifterData(&idData, totalDataLength);
@@ -250,7 +250,7 @@ void setup() {
   firstTime = true;
 
 #ifdef SERIAL_DEBUG
-  DEBUG_SERIAL.print(F("Setup done\r\n")); //! Let the user know we are done with the setup function.
+  DEBUG_SERIAL.print(F("Setup done\n")); //! Let the user know we are done with the setup function.
 #endif // SERIAL_DEBUG
 
 }
@@ -327,14 +327,14 @@ void loop() {
 #ifdef SERIAL_DEBUG
     DEBUG_SERIAL.print(F("Fix found - sleep "));
     DEBUG_SERIAL.print(sleepMins);
-    DEBUG_SERIAL.print(F(" minutes\r\n"));
+    DEBUG_SERIAL.print(F(" minutes\n"));
     DEBUG_SERIAL.flush();
     DEBUG_SERIAL.end();
 #endif // SERIAL_DEBUG
     sleepSecs = sleepMins * 60;
   } else {
 #ifdef SERIAL_DEBUG
-    DEBUG_SERIAL.print(F("Fix not found - sleep 60 minutes\r\n"));
+    DEBUG_SERIAL.print(F("Fix not found - sleep 60 minutes\n"));
     DEBUG_SERIAL.flush();
     DEBUG_SERIAL.end();
 #endif // SERIAL_DEBUG
@@ -349,7 +349,7 @@ void loop() {
   } while (sleepSecs > 0);
 #ifdef SERIAL_DEBUG
   DEBUG_SERIAL.begin(CONSOLE_BAUD);
-  DEBUG_SERIAL.print(F("wake up\r\n"));
+  DEBUG_SERIAL.print(F("wake up\n"));
   DEBUG_SERIAL.flush();
 #endif // SERIAL_DEBUG
 }
