@@ -1,19 +1,20 @@
 //*****************************************************************************
 // idecode.c
 //
-// This program reads icedrifter chunk data, reconstricts the original data 
+// This program reads icedrifter chunk data, reconstricts the original data
 // record as it was built by the icedrifter code, saves that data to a file,
 // and then decodes and prints the data.  Optionally, an email containing
 // the reconstructed data record and the printed data can be sent out.
-//  
+//
 // It also has the ability to read in a reconstructed data record and print
 // that data.
 //
-//***************************************************************************** 
+//*****************************************************************************
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <time.h>
 #include <stdbool.h>
@@ -23,15 +24,15 @@
 
 icedrifterData idData; // structure that defines the icedrifter record.
 
-#define BUFF_SIZE 2048  // size of the buffer used to decode character data.        
+#define BUFF_SIZE 2048  // size of the buffer used to decode character data.
 #define FILE_NAME_SIZE  1024  // size of buffers used for file names.
 #define GPS_TIME_SIZE 16  // size of the buffer used to decode gps time and date.
 
 bool mailResultsSwitch; // switch to indicate an email should be sent.
 char emailAddress[256]; // email address to send the email to.
 
-int getDataByChunk(char**, int); 
-void saveData(char* fileName); 
+int getDataByChunk(char**, int);
+void saveData(char* fileName);
 int getDataByFile(char**);
 int getDataByChar(char**, int);
 void decodeData(char* fileName);
@@ -49,6 +50,7 @@ void printHelp(void);
 
 int main(int argc, char** argv) {
   int argIx;
+  struct stat fileStat;
 
 // we are expecting at least one argument.
   if (argc == 1) {
@@ -71,12 +73,20 @@ int main(int argc, char** argv) {
           ++argIx;
           break;
         case 'c':
+          if (stat(argv[argIx + 1], &fileStat) < 0) {
+            printf("No files found.\n");
+            return (0);
+          }
           if (getDataByChunk(&argv[argIx + 1], argc - argIx - 1) != 0) {
             exit(1);
           }
           printf("Decode sucessful.\n");
           return (0);
         case 'f':
+          if (stat(argv[1], &fileStat) < 0) {
+            printf("No file found.\n");
+            return (0);
+          }
           if (getDataByFile(&argv[argIx + 1]) != 0) {
             exit(1);
           }
@@ -103,16 +113,16 @@ int main(int argc, char** argv) {
 //
 // This routine reads in 1 to 3 chunk files, verifies that the data is all
 // associated with one idrifterData record and then rebuilds the data record.
-// 
+//
 // It then decodes the data and send the data in a humand readable format
 // to the console and writes out the idrifter data record to the current
-// directory with the file name of Rockblock id number followed by a '-' 
+// directory with the file name of Rockblock id number followed by a '-'
 // followed by the date and time the sample was taken, and has an extension
 // of '.dat'.
 //
 // Optionally, the decoded data and the idrifterData file can be sent by email
 // to the email address specified.
-// 
+//
 // fnl is a pointer to the first chunk name specified on the command line.
 //
 // cnt is the number of files names speciried on the command line.
@@ -157,7 +167,7 @@ int getDataByChunk(char** fnl, int cnt) {
   zeroRecordFound = false;
 
   // Extract the Rockblock ID number from the file name and make sure
-  // all IDs match.  
+  // all IDs match.
   for (i = 0; i < cnt; ++i) {
 
     strcpy(tempHold, argIx[i]);
@@ -178,7 +188,7 @@ int getDataByChunk(char** fnl, int cnt) {
             printf("Processing data for Rockblock %s.\n", fileName);
             break;
           } else {
-            // If the Rockblock ID's don't match we can not continue. 
+            // If the Rockblock ID's don't match we can not continue.
             if (strcmp(fileName, fnPtr) != 0) {
               printf("Error: File %d Rockblock name not equal previous file(s)!", i);
               printf("idecode terminating.\n");
@@ -188,12 +198,12 @@ int getDataByChunk(char** fnl, int cnt) {
           }
         }
       }
-      ++wkPtr; 
+      ++wkPtr;
     }
 
     // If no dash was found we don't know what type of file this is
     // so we quit.
-    if (dashFound = false) {
+    if (dashFound == false) {
       printf("Error: Invalid Icedrifter file name = %s!", argIx[i]);
       printf("idecode terminating.\n");
       exit(1);
@@ -236,7 +246,7 @@ int getDataByChunk(char** fnl, int cnt) {
       exit(1);
     }
 
-    // Pick up the report time from the first chunk processed and check 
+    // Pick up the report time from the first chunk processed and check
     // that the other chunks have the same report time.
     if (firstTime) {
       recordTime = idcPtr->idcSendTime;
@@ -275,7 +285,7 @@ int getDataByChunk(char** fnl, int cnt) {
   // If no Zero record was found it doesn't make sense to continue.
   if (zeroRecordFound == false) {
     printf("Error: No record 0 found.  Can not continue!\n");
-    printf("idecode terminating.\n"); 
+    printf("idecode terminating.\n");
     exit(1);
   }
 
@@ -283,7 +293,7 @@ int getDataByChunk(char** fnl, int cnt) {
   // we need to convert that data to little endien.
   convertBigEndianToLittleEndian((char*)&idData.idChainData, sizeof(idData.idChainData));
 
-  // Build the file names that will be used to output the data.  
+  // Build the file names that will be used to output the data.
   // The file names will be <Rockblock ID>-<report date and time>.
   strcpy(datName, fileName);
   strcat(datName, "-");
@@ -304,8 +314,8 @@ int getDataByChunk(char** fnl, int cnt) {
 
   // If the user wants to send this data out by email, use mutt to do it.
   if (mailResultsSwitch == true) {
-    sprintf(tempHold, "mutt -s \"Data for %s\" -a %s %s -- %s < %s",
-            fileName, datName, txtName, emailAddress, txtName);
+    sprintf(tempHold, "mutt -s \"Data for %s\" -a %s %s -- %s < \"Data for %s\"",
+            fileName, datName, txtName, emailAddress, fileName);
 
     if (system(tempHold) != 0) {
       printf("Error returned from mutt command!!!\n");
@@ -318,11 +328,11 @@ int getDataByChunk(char** fnl, int cnt) {
 //*****************************************************************************
 //
 // saveData
-// 
+//
 // fileName is the name that will be given the file.
-// 
+//
 // returns nothing.
-// 
+//
 // This function writes the icedrifterData structure to disk.
 //
 //*****************************************************************************
@@ -401,17 +411,17 @@ int getDataByFile(char** fnl) {
 //*****************************************************************************
 //
 // getDataByChar
-// 
-// data: A pointer to an arg entry containing the character data to be 
+//
+// data: A pointer to an arg entry containing the character data to be
 //       converted into an icedrifterData structure.
-// 
+//
 // cnt:  The number of arg entries to process.
-// 
-// This function takes character data clipped out of the email sent from 
+//
+// This function takes character data clipped out of the email sent from
 // Rockblock.  The data is converted to hex data and copied into the structure.
 // The structure is then printed in human readable format.  This feature is
 // not documented in the help listing and is used mainly for testing.
-//      
+//
 //*****************************************************************************
 
 int getDataByChar(char** data, int cnt) {
@@ -509,10 +519,10 @@ int getDataByChar(char** data, int cnt) {
 //*****************************************************************************
 //
 // decodeData
-// 
+//
 // fileName: The file name to write the decoded data in human readable forman.
 //           If fileName is NULL the data will be written to sysour.
-// 
+//
 // The function decodes and prints in human readable format the data contained
 // in the icddrifterData structure.
 //
@@ -527,7 +537,7 @@ void decodeData(char* fileName) {
   uint32_t ltClear;
   uint8_t rgbRed;
   uint8_t rgbGreen;
-  uint8_t rgbBlue; 
+  uint8_t rgbBlue;
 
 
 
@@ -614,7 +624,7 @@ void decodeData(char* fileName) {
 //
 // chr: a charactor to be converted from charactor formant ot hex format.
 //
-// This function takes a charactor in the range of 0123456789abcdef and 
+// This function takes a charactor in the range of 0123456789abcdef and
 // converts it to a byte containing the hex value.
 //
 //*****************************************************************************
@@ -634,14 +644,14 @@ char convertCharToHex(char chr) {
 //*****************************************************************************
 //
 // convertBigEndianToLittleEndian
-// 
+//
 // sPtr: A pointer to the beginning of the area to convert.
-// 
+//
 // size: The number of bytes to convert.
-// 
+//
 // This function converts a list of halfwords from big endian to little endian
 // by swapping the two bytes of the halfwords.
-// 
+//
 //*****************************************************************************
 void convertBigEndianToLittleEndian(char* sPtr, int size) {
   char tmp;
@@ -663,7 +673,7 @@ void convertBigEndianToLittleEndian(char* sPtr, int size) {
 // returns: the sensor temperature in Celsius.
 //
 // Converts the sensor temperature data from it's native form to Celsius.
-// 
+//
 //*****************************************************************************
 float convertTempToC(short temp) {
 
