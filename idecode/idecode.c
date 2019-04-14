@@ -314,8 +314,8 @@ int getDataByChunk(char** fnl, int cnt) {
 
   // If the user wants to send this data out by email, use mutt to do it.
   if (mailResultsSwitch == true) {
-    sprintf(tempHold, "mutt -s \"Data for %s\" -a %s %s -- %s < \"Data for %s\"",
-            fileName, datName, txtName, emailAddress, fileName);
+    sprintf(tempHold, "mutt -s \"Decoded data for %s\" -a %s %s -- %s < %s",
+            fileName, datName, txtName, emailAddress, txtName);
 
     if (system(tempHold) != 0) {
       printf("Error returned from mutt command!!!\n");
