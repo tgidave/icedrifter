@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
           printf("Decode sucessful.\n");
           return (0);
         case 'f':
-          if (stat(argv[1], &fileStat) < 0) {
+          if (stat(argv[argIx + 1], &fileStat) < 0) {
             printf("No file found.\n");
             return (0);
           }
