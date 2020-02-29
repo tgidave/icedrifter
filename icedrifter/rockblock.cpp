@@ -12,6 +12,23 @@ IridiumSBD isbd(rbSerial, ROCKBLOCK_SLEEP_PIN);
 
 iceDrifterChunk idcChunk;
 
+const char rbhexchars[] = "0123456789ABCDEF";
+
+void rbprintHexChar(uint8_t x) {
+  Serial.print(rbhexchars[(x >> 4)]);
+  Serial.print(rbhexchars[(x & 0x0f)]);
+}
+
+#ifdef SERIAL_DEBUG_ROCKBLOCK
+void ISBDConsoleCallback(IridiumSBD *device, char c) {
+  DEBUG_SERIAL.write(c);
+}
+
+void ISBDDiagsCallback(IridiumSBD* device, char c) {
+  DEBUG_SERIAL.write(c);
+}
+#endif
+
 void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
 
 #ifdef NEVER_TRANSMIT
@@ -32,11 +49,7 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
   uint8_t* wkPtr;
 
   // Setup the RockBLOCK
-#ifdef SERIAL_DEBUG_ROCKBLOCK
-  isbd.attachConsole(DEBUG_SERIAL);
-  isbd.attachDiags(DEBUG_SERIAL);
-#endif // SERIAL_DEBUG_ROCKBLOCK
-  isbd.setPowerProfile(1);
+  isbd.setPowerProfile(IridiumSBD::USB_POWER_PROFILE);
 
 #ifdef SERIAL_DEBUG_ROCKBLOCK
   DEBUG_SERIAL.flush();
@@ -99,7 +112,7 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
       wkPtr = (uint8_t *)&idcChunk;
 
       for (i = 0; i < chunkLen; i++) {
-        printHexChar((uint8_t)*wkPtr);
+        rbprintHexChar((uint8_t)*wkPtr);
         ++wkPtr;
       }
 

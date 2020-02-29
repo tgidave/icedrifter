@@ -81,7 +81,7 @@ const bool timeToReport[24] = {
   false,  // 23:00 UTC
 };
 
-enum period_t { /// Values for setting the watchdog timer.
+enum period_t { // Values for setting the watchdog timer.
   SLEEP_15MS,
   SLEEP_30MS,
   SLEEP_60MS,
@@ -95,19 +95,19 @@ enum period_t { /// Values for setting the watchdog timer.
   SLEEP_FOREVER
 };
 
-bool firstTime;   /// Set true in the setup function and set false after the first
-                  /// time through the loop function.  Used to indicate when to
-/// capture the last boot date and time.
+bool firstTime;   // Set true in the setup function and set false after the first
+                  // time through the loop function.  Used to indicate when to
+                  // capture the last boot date and time.
 
-bool gotFullFix;  /// Indicates that a Full fix was received.
+bool gotFullFix;  // Indicates that a Full fix was received.
 
-int noFixFoundCount;  /// Number of times the GPS device could not get a fix.
+int noFixFoundCount;  // Number of times the GPS device could not get a fix.
 
-int fixFound; /// indicates weather the last call to the GPS system returned a fix.
+int fixFound; // indicates weather the last call to the GPS system returned a fix.
 
-icedrifterData idData;  /// Structure for accumulating and sending sensor data,
+icedrifterData idData;  // Structure for accumulating and sending sensor data,
 
-time_t lbTime;  /// Time and date of the last boot.
+time_t lbTime;  // Time and date of the last boot.
 
 const char hexchars[] = "0123456789ABCDEF";
 
@@ -116,16 +116,16 @@ void printHexChar(uint8_t x) {
   Serial.print(hexchars[(x & 0x0f)]);
 }
 
-/// powerDown - Put processor into low power mode.
-///
-/// This function first set up the watchdog timer to go of after
-/// the maxiuum interval
-/// of 8 seconds and then puts the processor into low power sleep node.  After
-/// approximately 8 seconds the interval time will expire and wake up the processor
-/// and the program continues.
-///
-/// \param void
-/// \return void
+// powerDown - Put processor into low power mode.
+//
+// This function first set up the watchdog timer to go of after
+// the maxiuum interval
+// of 8 seconds and then puts the processor into low power sleep node.  After
+// approximately 8 seconds the interval time will expire and wake up the processor
+// and the program continues.
+//
+// \param void
+// \return void
 
 void powerDown(void) {
   ADCSRA &= ~(1 << ADEN);
@@ -136,24 +136,24 @@ void powerDown(void) {
   noSleep();
 }
 
-/// <summary>
-/// ISR - Interrupt Service Routine for handeling the watchdog
-/// timer interupt.  This routine disables the WDT interupt and
-/// then returns. </summary>
-/// <param> WDT_vect </param>
-/// <returns>"Nothing"</returns>
+// <summary>
+// ISR - Interrupt Service Routine for handeling the watchdog
+// timer interupt.  This routine disables the WDT interupt and
+// then returns. </summary>
+// <param> WDT_vect </param>
+// <returns>"Nothing"</returns>
 
 ISR(WDT_vect) {
-  /// WDIE & WDIF is cleared in hardware upon entering this ISR
+  // WDIE & WDIF is cleared in hardware upon entering this ISR
   wdt_disable();
 }
 
-/// <summary>
-/// Accumulate and send data. This function captures the sender
-/// data and sends that data to the user.
-/// </summary>
-/// <param name="void"></param>
-/// <returns>"void"</returns>
+// <summary>
+// Accumulate and send data. This function captures the sender
+// data and sends that data to the user.
+// </summary>
+// <param name="void"></param>
+// <returns>"void"</returns>
 
 void accumulateAndSendData(void) {
 
@@ -219,8 +219,8 @@ void accumulateAndSendData(void) {
   rbTransmitIcedrifterData(&idData, totalDataLength);
 }
 
-//! setup - This is an arduino defined routine that is called only once after the processor is booted.
-//!
+// setup - This is an arduino defined routine that is called only once after the processor is booted.
+
 void setup() {
   pinMode(GPS_POWER_PIN, OUTPUT);
   digitalWrite(GPS_POWER_PIN, LOW);
@@ -242,47 +242,48 @@ void setup() {
   digitalWrite(ROCKBLOCK_POWER_PIN, LOW);
 
 #ifdef SERIAL_DEBUG
-  //! Start the serial ports
+  // Start the serial ports
   DEBUG_SERIAL.begin(CONSOLE_BAUD);
 #endif // SERIAL_DEBUG
 
-  gotFullFix = false; //! Clear the GPS full fix switch so the first call to the loop function requests a full fix.
+  gotFullFix = false; // Clear the GPS full fix switch so the first call to the loop function requests a full fix.
   firstTime = true;
 
 #ifdef SERIAL_DEBUG
-  DEBUG_SERIAL.print(F("Setup done\n")); //! Let the user know we are done with the setup function.
+  DEBUG_SERIAL.print(F("Setup done\n")); // Let the user know we are done with the setup function.
 #endif // SERIAL_DEBUG
 
 }
 
-//! loop - This is the main processing function for the arduino system.
-//!
-//! The first time through this function a full GPS fix is requested.  If no fix is
-//! received the processor is put to sleep for 60 minutes and then a full GPS fix
-//! will be requested again.  This continues until a full fix is received.
-//!
-//! Upon receiving a full GPS fix. the minutes are calculated to wake up the processor
-//! at the next half hour and the processor is put to sleep.
-//!
-//! Once a full GPS fix is received, only the current time is requested from the GPS.
-//! That's all that is needed to calculate the minutes to the next wake up time.
+// loop - This is the main processing function for the arduino system.
+//
+// The first time through this function a full GPS fix is requested.  If no fix is
+// received the processor is put to sleep for 60 minutes and then a full GPS fix
+// will be requested again.  This continues until a full fix is received.
+//
+// Upon receiving a full GPS fix. the minutes are calculated to wake up the processor
+// at the next half hour and the processor is put to sleep.
+//
+// Once a full GPS fix is received, only the current time is requested from the GPS.
+// That's all that is needed to calculate the minutes to the next wake up time.
+
 void loop() {
 
-  int sleepSecs;  //! Number of seconds to sleep before the processor is woken up.
-  int sleepMins;  //! Number of minutes to sleep before the processor is woken up.
+  int sleepSecs;  // Number of seconds to sleep before the processor is woken up.
+  int sleepMins;  // Number of minutes to sleep before the processor is woken up.
 
-  noFixFoundCount = 0;  //! clear the no fix found count.
+  noFixFoundCount = 0;  // clear the no fix found count.
 
-  //! Check to see if a full fix was received.  If not, try to get a full fix.
-  //! If so, just get a time fix.
+  // Check to see if a full fix was received.  If not, try to get a full fix.
+  // If so, just get a time fix.
   if (gotFullFix) {
     fixFound = gpsGetFix(FIX_TIME, &idData);
   } else {
     fixFound = gpsGetFix(FIX_FULL, &idData);
   }
 
-  //! If a GPS fix was received, set the gotFullFix switch and clear the noFixFound count.
-  //! Otherwise add one to the noFixFoundCount.
+  // If a GPS fix was received, set the gotFullFix switch and clear the noFixFound count.
+  // Otherwise add one to the noFixFoundCount.
   if (fixFound) {
     gotFullFix = true;
     noFixFoundCount = 0;
@@ -315,11 +316,11 @@ void loop() {
   fixFound = gpsGetFix(FIX_TIME, &idData);
   firstTime = false;
 
-  //! If a GPS fix was found
+  // If a GPS fix was found
   if (fixFound) {
-    //! Calculate the minutes until the next half hour,
+    // Calculate the minutes until the next half hour,
     sleepMins = 90 - minute(idData.idGPSTime);
-    //! If it less than 15 minutes until the nex half hour,
+    // If it less than 15 minutes until the nex half hour,
     if (sleepMins >= 75) {
       sleepMins -= 60;
     }

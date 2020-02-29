@@ -23,6 +23,14 @@ enum period_t {
   SLEEP_FOREVER
 };
 
+void ISBDConsoleCallback(IridiumSBD *device, char c) {
+  Serial.write(c);
+}
+
+void ISBDDiagsCallback(IridiumSBD* device, char c) {
+  Serial.write(c);
+}
+
 //! powerDown - Put processor into low power mode.
 //!
 //! This function first set up the watchdog timer to go of after the maxiuum interval
@@ -64,8 +72,7 @@ void setup() {
 
   Serial.print("Starting rockblock test\r\n");
 
-  isbd.attachConsole(Serial);
-  isbd.setPowerProfile(1);
+  isbd.setPowerProfile(IridiumSBD::USB_POWER_PROFILE);
   isbd.begin();
 
   int err = isbd.getSignalQuality(signalQuality);

@@ -44,7 +44,7 @@
 // and then every hour on the half hour after that.  Comment out
 // the next line to run normally.
 
-//#define TEST_ALL  // test as much code a possible at bootup.
+#define TEST_ALL  // test as much code a possible at bootup.
 
 // The NEVER_TRANSMIT switch does all processing determined by
 // other switches including turning on and initializing the
@@ -55,7 +55,7 @@
 
 //To turn off the debugging messages, comment out the next line.
 
-//#define SERIAL_DEBUG
+#define SERIAL_DEBUG
 
 //The following defines are used to control what data is transmitted during debugging.
 //If "SERIAL_DEBUG" is not defined they have no effect.
