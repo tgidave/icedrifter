@@ -1,4 +1,4 @@
-/*!                                                                              
+/*                                                                              
  *  @file icedrifter.ino                                                  
  *                                                                               
  *  @mainpage Code to implement the Icedrifter buoy.                     
