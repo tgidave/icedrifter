@@ -44,7 +44,7 @@
 // and then every hour on the half hour after that.  Comment out
 // the next line to run normally.
 
-#define TEST_ALL  // test as much code a possible at bootup.
+//#define TEST_ALL  // test as much code a possible at bootup.
 
 // The NEVER_TRANSMIT switch does all processing determined by
 // other switches including turning on and initializing the
