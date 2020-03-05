@@ -24,8 +24,7 @@
  *  v1.0 - First release                                                         
  */
 
-#include <TimeLib.h>
-#include <Time.h>
+#include <time.h>
 
 //#include <arduino.h>
 #include <avr/wdt.h>
@@ -58,30 +57,30 @@
 #define SEND_REPORT true
 
 const bool timeToReport[24] = {
-  NO_REPORT,  // Midnight UTC
+  SEND_REPORT,  // Midnight UTC
   SEND_REPORT,  // 01:00 UTC
-  NO_REPORT,  // 02:00 UTC
-  NO_REPORT,  // 03:00 UTC
-  NO_REPORT,  // 04:00 UTC
-  NO_REPORT,  // 05:00 UTC
-  NO_REPORT,  // 06:00 UTC
-  NO_REPORT,  // 07:00 UTC - Midnight Mountain standard time
-  NO_REPORT,  // 08:00 UTC
-  NO_REPORT,  // 09:00 UTC
-  NO_REPORT,  // 10:00 UTC
-  NO_REPORT,  // 11:00 UTC
-  NO_REPORT,  // Noon UTC
+  SEND_REPORT,  // 02:00 UTC
+  SEND_REPORT,  // 03:00 UTC
+  SEND_REPORT,  // 04:00 UTC
+  SEND_REPORT,  // 05:00 UTC
+  SEND_REPORT,  // 06:00 UTC
+  SEND_REPORT,  // 07:00 UTC - Midnight Mountain standard time
+  SEND_REPORT,  // 08:00 UTC
+  SEND_REPORT,  // 09:00 UTC
+  SEND_REPORT,  // 10:00 UTC
+  SEND_REPORT,  // 11:00 UTC
+  SEND_REPORT,  // Noon UTC
   SEND_REPORT,  // 13:00 UTC
-  NO_REPORT,  // 14:00 UTC
-  NO_REPORT,  // 15:00 UTC
-  NO_REPORT,  // 16:00 UTC
-  NO_REPORT,  // 17:00 UTC
-  NO_REPORT,  // 18:00 UTC
-  NO_REPORT,  // 19:00 UTC - Noon Mountain standard time
-  NO_REPORT,  // 20:00 UTC
-  NO_REPORT,  // 21:00 UTC
-  NO_REPORT,  // 22:00 UTC
-  NO_REPORT,  // 23:00 UTC
+  SEND_REPORT,  // 14:00 UTC
+  SEND_REPORT,  // 15:00 UTC
+  SEND_REPORT,  // 16:00 UTC
+  SEND_REPORT,  // 17:00 UTC
+  SEND_REPORT,  // 18:00 UTC
+  SEND_REPORT,  // 19:00 UTC - Noon Mountain standard time
+  SEND_REPORT,  // 20:00 UTC
+  SEND_REPORT,  // 21:00 UTC
+  SEND_REPORT,  // 22:00 UTC
+  SEND_REPORT,  // 23:00 UTC
 };
 
 enum period_t { // Values for setting the watchdog timer.
@@ -251,11 +250,11 @@ void setup() {
 
   gotFullFix = false; // Clear the GPS full fix switch so the first call to the loop function requests a full fix.
   firstTime = true;
+  noFixFoundCount = 0;  // clear the no fix found count.
 
 #ifdef SERIAL_DEBUG
   DEBUG_SERIAL.print(F("Setup done\n")); // Let the user know we are done with the setup function.
 #endif // SERIAL_DEBUG
-
 }
 
 // loop - This is the main processing function for the arduino system.
@@ -275,7 +274,6 @@ void loop() {
   int sleepSecs;  // Number of seconds to sleep before the processor is woken up.
   int sleepMins;  // Number of minutes to sleep before the processor is woken up.
 
-  noFixFoundCount = 0;  // clear the no fix found count.
 
   // Check to see if a full fix was received.  If not, try to get a full fix.
   // If so, just get a time fix.
@@ -301,14 +299,14 @@ void loop() {
   accumulateAndSendData();
 #elif defined(TRANSMIT_AT_BOOT)
   if (firstTime ||
-      ((fixFound && timeToReport[hour(idData.idGPSTime)] == true) ||
+      ((fixFound && timeToReport[gpsGetHour()] == SEND_REPORT) ||
        noFixFoundCount >= 24)) {
     noFixFoundCount = 0;
     accumulateAndSendData();
   }
 #else
   if (!firstTime &&
-      ((fixFound && timeToReport[hour(idData.idGPSTime)] == true) ||
+      ((fixFound && (timeToReport[gpsGetHour()] == SEND_REPORT) ||
        noFixFoundCount >= 24)) {
     noFixFoundCount = 0;
     accumulateAndSendData();
@@ -316,13 +314,13 @@ void loop() {
 #endif // TEST_ALL
 
   // Accumulating and sending the data can take a while so update the time again.
-  fixFound = gpsGetFix(FIX_TIME, &idData);
+  fixFound = gpsGetFix(FIX_FULL, &idData);
   firstTime = false;
 
   // If a GPS fix was found
   if (fixFound) {
     // Calculate the minutes until the next half hour,
-    sleepMins = 90 - minute(idData.idGPSTime);
+    sleepMins = 90 - gpsGetMinute();
     // If it less than 15 minutes until the nex half hour,
     if (sleepMins >= 75) {
       sleepMins -= 60;

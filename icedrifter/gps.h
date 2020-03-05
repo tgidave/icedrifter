@@ -20,7 +20,8 @@ typedef enum ft {
 } fixType;
 
 int gpsGetFix(fixType typeFix, icedrifterData* idData);
-
+int8_t gpsGetHour(void);
+int8_t gpsGetMinute(void);
 #endif
 
 
