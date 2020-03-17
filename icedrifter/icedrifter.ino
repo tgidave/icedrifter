@@ -57,30 +57,30 @@
 #define SEND_REPORT true
 
 const bool timeToReport[24] = {
-  SEND_REPORT,  // Midnight UTC
+  NO_REPORT,  // Midnight UTC
   SEND_REPORT,  // 01:00 UTC
-  SEND_REPORT,  // 02:00 UTC
-  SEND_REPORT,  // 03:00 UTC
-  SEND_REPORT,  // 04:00 UTC
-  SEND_REPORT,  // 05:00 UTC
-  SEND_REPORT,  // 06:00 UTC
-  SEND_REPORT,  // 07:00 UTC - Midnight Mountain standard time
-  SEND_REPORT,  // 08:00 UTC
-  SEND_REPORT,  // 09:00 UTC
-  SEND_REPORT,  // 10:00 UTC
-  SEND_REPORT,  // 11:00 UTC
-  SEND_REPORT,  // Noon UTC
+  NO_REPORT,  // 02:00 UTC
+  NO_REPORT,  // 03:00 UTC
+  NO_REPORT,  // 04:00 UTC
+  NO_REPORT,  // 05:00 UTC
+  NO_REPORT,  // 06:00 UTC
+  NO_REPORT,  // 07:00 UTC - Midnight Mountain standard time
+  NO_REPORT,  // 08:00 UTC
+  NO_REPORT,  // 09:00 UTC
+  NO_REPORT,  // 10:00 UTC
+  NO_REPORT,  // 11:00 UTC
+  NO_REPORT,  // Noon UTC
   SEND_REPORT,  // 13:00 UTC
-  SEND_REPORT,  // 14:00 UTC
-  SEND_REPORT,  // 15:00 UTC
-  SEND_REPORT,  // 16:00 UTC
-  SEND_REPORT,  // 17:00 UTC
-  SEND_REPORT,  // 18:00 UTC
-  SEND_REPORT,  // 19:00 UTC - Noon Mountain standard time
-  SEND_REPORT,  // 20:00 UTC
-  SEND_REPORT,  // 21:00 UTC
-  SEND_REPORT,  // 22:00 UTC
-  SEND_REPORT,  // 23:00 UTC
+  NO_REPORT,  // 14:00 UTC
+  NO_REPORT,  // 15:00 UTC
+  NO_REPORT,  // 16:00 UTC
+  NO_REPORT,  // 17:00 UTC
+  NO_REPORT,  // 18:00 UTC
+  NO_REPORT,  // 19:00 UTC - Noon Mountain standard time
+  NO_REPORT,  // 20:00 UTC
+  NO_REPORT,  // 21:00 UTC
+  NO_REPORT,  // 22:00 UTC
+  NO_REPORT,  // 23:00 UTC
 };
 
 enum period_t { // Values for setting the watchdog timer.
