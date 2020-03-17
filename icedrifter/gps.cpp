@@ -97,7 +97,7 @@ int8_t gpsGetHour(void) {
   if (fixfnd) {
 #ifdef SERIAL_DEBUG_GPS
     DEBUG_SERIAL.print(F("Fix Found - gpsGetHour returning "));
-    DEBUG_SERIAL.print(timeStru.tm_min);
+    DEBUG_SERIAL.print(timeStru.tm_hour);
     DEBUG_SERIAL.print(F("\n"));
 #endif
     return (timeStru.tm_hour);
