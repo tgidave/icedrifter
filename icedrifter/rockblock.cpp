@@ -1,6 +1,7 @@
 
 #include <IridiumSBD.h>
 #include <SoftwareSerial.h>
+#include <stdio.h>
 
 #include "icedrifter.h"
 #include "rockblock.h"
@@ -47,6 +48,11 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
   uint8_t* dataPtr;
   uint8_t* chunkPtr;
   uint8_t* wkPtr;
+  struct tm* timeInfo;
+  char *buffPtr;
+  char buff[128];
+  char oBuff[340];
+
 
   // Setup the RockBLOCK
   isbd.setPowerProfile(IridiumSBD::USB_POWER_PROFILE);
@@ -84,57 +90,98 @@ void rbTransmitIcedrifterData(icedrifterData* idPtr, int idLen) {
     chunkPtr = (uint8_t*)&idcChunk.idcBuffer;
     dataLen = idLen;
 
-    while (dataLen > 0) {
-      idcChunk.idcSendTime = idPtr->idGPSTime;
-      idcChunk.idcRecordType[0] = 'I';
-      idcChunk.idcRecordType[1] = 'D';
-      idcChunk.idcRecordNumber = recCount;
+    if (dataLen == 0) {
 
-      if (dataLen > MAX_CHUNK_DATA_LENGTH) {
-        chunkLen = MAX_CHUNK_LENGTH;
-        dataLen -= MAX_CHUNK_DATA_LENGTH;
-      } else {
-        chunkLen = (dataLen + CHUNK_HEADER_SIZE);
-        dataLen = 0;
-      }
+      oBuff[0] = 0;
 
-      memmove(chunkPtr, dataPtr, chunkLen);
-      dataPtr += MAX_CHUNK_DATA_LENGTH;
-      ++recCount;
+      strcat(oBuff, "GMT=");
+      timeInfo = gmtime(&(idPtr->idGPSTime));
+      buffPtr = asctime(timeInfo);
+      strcat(oBuff, buffPtr);
+      strcat(oBuff, "\nLBT=");
+      timeInfo = gmtime(&idPtr->idLastBootTime);
+      buffPtr = asctime(timeInfo);
+      strcat(oBuff, buffPtr);
+      strcat(oBuff, "\nLat=");
+      buffPtr = dtostrf(idPtr->idLatitude, 4, 6, buff);
+      strcat(oBuff, buffPtr);
+      strcat(oBuff, "\nLon=");
+      buffPtr = dtostrf(idPtr->idLongitude, 4, 6, buff); 
+      strcat(oBuff, buffPtr);
+//    strcat(oBuff, "\nTmp=");
+//    buffPtr = dtostrf(idPtr->idTemperature, 4, 2, buff);
+//    strcat(oBuff, buffPtr);
+      strcat(oBuff, "\nBP=");
+      buffPtr = dtostrf(idPtr->idPressure, 6, 2, buff);
+      strcat(oBuff, buffPtr);
+      strcat(oBuff, " Pa\nTs=");
+      buffPtr = dtostrf(idPtr->idRemoteTemp, 4, 2, buff);
+      strcat(oBuff, buffPtr);
+      strcat(oBuff, " C\n");
 
 #ifdef SERIAL_DEBUG_ROCKBLOCK
-      DEBUG_SERIAL.flush();
-      DEBUG_SERIAL.print(F("Chunk address="));
-      DEBUG_SERIAL.print((long)chunkPtr, HEX);
-      DEBUG_SERIAL.print(F(" Chunk length="));
-      DEBUG_SERIAL.print(chunkLen);
-      DEBUG_SERIAL.print(F("\n"));
-      wkPtr = (uint8_t *)&idcChunk;
-
-      for (i = 0; i < chunkLen; i++) {
-        rbprintHexChar((uint8_t)*wkPtr);
-        ++wkPtr;
-      }
-
-      DEBUG_SERIAL.print(F("\n"));
-      DEBUG_SERIAL.flush();
+      DEBUG_SERIAL.print(oBuff);
+      delay(1000);
+//      DEBUG_SERIAL.flush();
 #endif // SERIAL_DEBUG_ROCKBLOCK
 
-      rc = isbd.sendSBDBinary((uint8_t*)&idcChunk, chunkLen);
+      dataLen = strlen(oBuff) + 1;
+      rc = isbd.sendSBDBinary((uint8_t *)oBuff, dataLen);
+
+    } else {
+
+      while (dataLen > 0) {
+        idcChunk.idcSendTime = idPtr->idGPSTime;
+        idcChunk.idcRecordType[0] = 'I';
+        idcChunk.idcRecordType[1] = 'D';
+        idcChunk.idcRecordNumber = recCount;
+
+        if (dataLen > MAX_CHUNK_DATA_LENGTH) {
+          chunkLen = MAX_CHUNK_LENGTH;
+          dataLen -= MAX_CHUNK_DATA_LENGTH;
+        } else {
+          chunkLen = (dataLen + CHUNK_HEADER_SIZE);
+          dataLen = 0;
+        }
+
+        memmove(chunkPtr, dataPtr, chunkLen);
+        dataPtr += MAX_CHUNK_DATA_LENGTH;
+        ++recCount;
 
 #ifdef SERIAL_DEBUG_ROCKBLOCK
-      DEBUG_SERIAL.flush();
-      if (rc == 0) {
-        DEBUG_SERIAL.print(F("Good return code from send!\n"));
         DEBUG_SERIAL.flush();
-      } else {
-        DEBUG_SERIAL.print(F("Bad return code from send = "));
-        DEBUG_SERIAL.print(rc);
+        DEBUG_SERIAL.print(F("Chunk address="));
+        DEBUG_SERIAL.print((long)chunkPtr, HEX);
+        DEBUG_SERIAL.print(F(" Chunk length="));
+        DEBUG_SERIAL.print(chunkLen);
+        DEBUG_SERIAL.print(F("\n"));
+        wkPtr = (uint8_t *)&idcChunk;
+
+        for (i = 0; i < chunkLen; i++) {
+          rbprintHexChar((uint8_t)*wkPtr);
+          ++wkPtr;
+        }
+
         DEBUG_SERIAL.print(F("\n"));
         DEBUG_SERIAL.flush();
-      }
 #endif // SERIAL_DEBUG_ROCKBLOCK
+
+        rc = isbd.sendSBDBinary((uint8_t*)&idcChunk, chunkLen);
+
+      }
     }
+#ifdef SERIAL_DEBUG_ROCKBLOCK
+    DEBUG_SERIAL.flush();
+    if (rc == 0) {
+      DEBUG_SERIAL.print(F("Good return code from send!\n"));
+      DEBUG_SERIAL.flush();
+    } else {
+      DEBUG_SERIAL.print(F("Bad return code from send = "));
+      DEBUG_SERIAL.print(rc);
+      DEBUG_SERIAL.print(F("\n"));
+      DEBUG_SERIAL.flush();
+    }
+#endif // SERIAL_DEBUG_ROCKBLOCK
 
 #ifdef SERIAL_DEBUG_ROCKBLOCK
   } else {

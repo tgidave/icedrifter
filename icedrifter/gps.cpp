@@ -125,3 +125,8 @@ int8_t gpsGetMinute(void) {
 #endif
   return (-1);
 }
+
+void getAsciTime( uint8_t* oTime) {
+
+}
+

@@ -37,6 +37,13 @@
 // ***                                                                      ***
 // ****************************************************************************
 //
+// The HUMAN_READABLE_DISPLAY switch tells the system to display basic 
+// information collected in human readable format.  Information that will be 
+// displayed consists of GPS time, last boot time,  latitude, longitude, 
+// atmospheric pressure and remote temperature.
+
+//#define HUMAN_READABLE_DISPLAY
+
 // The TEST_ALL switch will collect and send data at bootup
 // and then every hour on the half hour after that.  Comment out
 // the next line to run normally.

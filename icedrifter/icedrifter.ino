@@ -1,4 +1,4 @@
-/*                                                                              
+ /*                                                                              
  *  @file icedrifter.ino                                                  
  *                                                                               
  *  @mainpage Code to implement the Icedrifter buoy.                     
@@ -101,11 +101,13 @@ bool firstTime;   // Set true in the setup function and set false after the firs
                   // time through the loop function.  Used to indicate when to
                   // capture the last boot date and time.
 
-bool gotFullFix;  // Indicates that a Full fix was received.
+//bool gotFullFix;  // Indicates that a Full fix was received.
 
 int noFixFoundCount;  // Number of times the GPS device could not get a fix.
 
-int fixFound; // indicates weather the last call to the GPS system returned a fix.
+bool fixFound; // indicates weather the last call to the GPS system returned a fix.
+
+bool bootTimeSet;
 
 icedrifterData idData;  // Structure for accumulating and sending sensor data,
 
@@ -165,6 +167,7 @@ void accumulateAndSendData(void) {
   int totalDataLength;
   int recCount;
   uint8_t* wkPtr;
+  uint8_t decodeData[340];
 
 
   totalDataLength = BASE_RECORD_LENGTH;
@@ -218,7 +221,11 @@ void accumulateAndSendData(void) {
   DEBUG_SERIAL.print(F("\n"));
 #endif // SERIAL_DEBUG
 
+#ifdef HUMAN_READABLE_DISPLAY
+  rbTransmitIcedrifterData(&idData, 0);
+#else
   rbTransmitIcedrifterData(&idData, totalDataLength);
+#endif // HUMAN_READABLE_DISPLAY
 }
 
 // setup - This is an arduino defined routine that is called only once after the processor is booted.
@@ -248,8 +255,9 @@ void setup() {
   DEBUG_SERIAL.begin(CONSOLE_BAUD);
 #endif // SERIAL_DEBUG
 
-  gotFullFix = false; // Clear the GPS full fix switch so the first call to the loop function requests a full fix.
+//  gotFullFix = false; // Clear the GPS full fix switch so the first call to the loop function requests a full fix.
   firstTime = true;
+  bootTimeSet = false;
   noFixFoundCount = 0;  // clear the no fix found count.
 
 #ifdef SERIAL_DEBUG
@@ -277,22 +285,27 @@ void loop() {
 
   // Check to see if a full fix was received.  If not, try to get a full fix.
   // If so, just get a time fix.
-  if (gotFullFix) {
-    fixFound = gpsGetFix(FIX_TIME, &idData);
-  } else {
+//  if (gotFullFix) {
+//    fixFound = gpsGetFix(FIX_TIME, &idData);
+//  } else {
     fixFound = gpsGetFix(FIX_FULL, &idData);
-  }
+//  }
 
   // If a GPS fix was received, set the gotFullFix switch and clear the noFixFound count.
   // Otherwise add one to the noFixFoundCount.
   if (fixFound) {
-    gotFullFix = true;
+//    gotFullFix = true;
     noFixFoundCount = 0;
-    if (firstTime) {
+
+    if (bootTimeSet == false) {
       lbTime = idData.idLastBootTime = idData.idGPSTime;
+      bootTimeSet = true;
     }
   } else {
     ++noFixFoundCount;
+    if (bootTimeSet == false) {
+      idData.idLastBootTime = 0;
+    }
   }
 
 #ifdef TEST_ALL
@@ -319,6 +332,12 @@ void loop() {
 
   // If a GPS fix was found
   if (fixFound) {
+    // Check once more to see if the boot time field has been set.
+    if (bootTimeSet == false) {
+      lbTime = idData.idLastBootTime = idData.idGPSTime;
+      bootTimeSet = true;
+    }
+
     // Calculate the minutes until the next half hour,
     sleepMins = 90 - gpsGetMinute();
     // If it less than 15 minutes until the nex half hour,
@@ -355,4 +374,3 @@ void loop() {
   DEBUG_SERIAL.flush();
 #endif // SERIAL_DEBUG
 }
-
