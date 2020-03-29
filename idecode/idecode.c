@@ -28,6 +28,11 @@ icedrifterData idData; // structure that defines the icedrifter record.
 #define FILE_NAME_SIZE  1024  // size of buffers used for file names.
 #define GPS_TIME_SIZE 16  // size of the buffer used to decode gps time and date.
 
+// The Linux epoch starts at 01/01/1970 and the Arduino epoch starts at
+// 01/01/2000.  The number of seconds between those epochs added to the Arduino
+// time_t value to get the Linux value.
+#define SECONDS_BETWEEN_LINUX_EPOCH_AND_ARDUINO_EPOCH 946684800 
+
 bool mailResultsSwitch; // switch to indicate an email should be sent.
 char emailAddress[256]; // email address to send the email to.
 
@@ -552,14 +557,18 @@ void decodeData(char* fileName) {
     }
   }
 
-  tempTime = (time_t)idData.idLastBootTime;
+  // Linux epoch start in 1970 and arduino time epoch starts in 2000
+  // so we need to add the number of seconds in that time period.
+  tempTime = (time_t)idData.idLastBootTime + SECONDS_BETWEEN_LINUX_EPOCH_AND_ARDUINO_EPOCH; 
   timeInfo = gmtime(&tempTime);
   timeInfo->tm_year += 30; // Linux epoch start in 1970 and arduino time epoch starts in 2000
   fprintf(fd, "Last Boot:   %s", asctime(timeInfo));
 
-  tempTime = (time_t)idData.idGPSTime;
+  // Linux epoch start in 1970 and arduino time epoch starts in 2000
+  // so we need to add the number of seconds in that time period.      
+  tempTime = (time_t)idData.idGPSTime + SECONDS_BETWEEN_LINUX_EPOCH_AND_ARDUINO_EPOCH;  
   timeInfo = gmtime(&tempTime);
-  timeInfo->tm_year += 30; // Linux epoch start in 1970 and arduino time epoch starts in 2000
+  timeInfo->tm_year; 
   fprintf(fd, "GPS time:    %s", asctime(timeInfo));
 
   if (idData.idcdError == 0) {
