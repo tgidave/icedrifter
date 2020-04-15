@@ -561,14 +561,12 @@ void decodeData(char* fileName) {
   // so we need to add the number of seconds in that time period.
   tempTime = (time_t)idData.idLastBootTime + SECONDS_BETWEEN_LINUX_EPOCH_AND_ARDUINO_EPOCH; 
   timeInfo = gmtime(&tempTime);
-  timeInfo->tm_year += 30; // Linux epoch start in 1970 and arduino time epoch starts in 2000
   fprintf(fd, "Last Boot:   %s", asctime(timeInfo));
 
   // Linux epoch start in 1970 and arduino time epoch starts in 2000
   // so we need to add the number of seconds in that time period.      
   tempTime = (time_t)idData.idGPSTime + SECONDS_BETWEEN_LINUX_EPOCH_AND_ARDUINO_EPOCH;  
   timeInfo = gmtime(&tempTime);
-  timeInfo->tm_year; 
   fprintf(fd, "GPS time:    %s", asctime(timeInfo));
 
   if (idData.idcdError == 0) {
